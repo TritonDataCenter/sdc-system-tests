@@ -1,0 +1,8 @@
+{
+    "name": "sdc-autotest",
+    "version": "0.0.1",
+    "dependencies": {
+        "tap": ">=0.0.11",
+        "async": ">=0.1.15"
+    }
+}
