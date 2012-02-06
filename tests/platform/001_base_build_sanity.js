@@ -7,7 +7,7 @@ var fs = require('fs');
 
 test("Check SDC health", function(t){
     t.plan(3);
-    child.exec('sdc-healthcheck -p', function(err, stdout, stderr){
+    child.exec('/smartdc/bin/sdc-healthcheck -p', function(err, stdout, stderr){
         t.equal(err, null, "sdc-healthcheck exited cleanly");
         t.notEqual(stderr, '', "service output is not blank");
         t.notLike(stdout, /offline/g, "no services showing as offline");
