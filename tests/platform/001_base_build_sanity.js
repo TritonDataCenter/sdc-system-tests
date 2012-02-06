@@ -5,6 +5,16 @@ var async = require('async');
 var child = require('child_process');
 var fs = require('fs');
 
+test("Check SDC health", function(t){
+    t.plan(3);
+    child.exec('sdc-healthcheck -p', function(err, stdout, stderr){
+        t.equal(err, null, "sdc-healthcheck exited cleanly");
+        t.notEqual(stderr, '', "service output is not blank");
+        t.notLike(stdout, /offline/g, "no services showing as offline");
+        t.end()
+    });
+});
+
 test("Check services status", function(t){
     t.plan(3);
     child.exec('svcs -xv', function(err, stdout, stderr){
