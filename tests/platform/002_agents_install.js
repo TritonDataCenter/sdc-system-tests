@@ -3,6 +3,7 @@
 var test = require('tap').test;
 var child = require('child_process');
 
+// This test is to check for regressions against AGENT-420
 test("Agents are installed", function(t) {
     t.plan(3);
 
