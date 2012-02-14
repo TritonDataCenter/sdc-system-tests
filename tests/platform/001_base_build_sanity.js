@@ -15,12 +15,12 @@ test("Check SDC health", function(t){
     });
 });
 
-test("Check services status", function(t){
+test("Check services (all zones) status", function(t){
     t.plan(3);
-    child.exec('svcs -xv', function(err, stdout, stderr){
-        t.equal(stdout, '', "svcs -xv shows no output on stdout");
-        t.equal(stderr, '', "svcs -xv shows no output on stderr");
-        t.equal(err, null, "svcs -xv exited cleanly");
+    child.exec('svcs -xvZ', function(err, stdout, stderr){
+        t.equal(stdout, '', "svcs -xvZ shows no output on stdout");
+        t.equal(stderr, '', "svcs -xvZ shows no output on stderr");
+        t.equal(err, null, "svcs -xvZ exited cleanly");
         t.end();
     });
 
@@ -79,3 +79,63 @@ test("Check platform version numbers", function(t){
      
 });
 
+
+test("Check zpool and correct datasets", function(t){
+
+    async.series([
+        function(cb){
+            // check for zpool 'zones' existinga
+            // zones    42681237504 5303693824  37377543680 12  100 ONLINE  -
+            //
+            child.exec('zpool list -Hp zones >/dev/null', function(err, stdout, stderr){
+                cb(null, { err: err, stdout: stdout, stderr: stderr });
+            });
+        },
+        function(cb){
+            child.exec('zfs list -Hp -d 1 -o name -t filesystem zones | ' +
+                    'grep -v "[0-9a-z]\\{8\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}"',
+                function(err, stdout, stderr){
+                    var ds_list = stdout.replace(/\n+$/, '');
+                    ds_list = ds_list.split("\n").filter(
+                        function(element, index, array){ 
+                            return element != '' && element != 'zones';
+                        }
+                    );
+                    cb(null, { err: err, ds_list: ds_list });
+                }
+            );
+        },
+        function(cb){
+            child.exec('zfs list -Hp -d 1 -o name -t volume zones | ' +
+                    'grep -v "[0-9a-z]\\{8\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}"',
+                function(err, stdout, stderr){
+                    var vol_list = stdout.replace(/\n+$/, '');
+                    vol_list = vol_list.split("\n");
+                    cb(null, { err: err, vol_list: vol_list });
+                }
+            );
+        } 
+    ], 
+    function(err, results){
+        t.plan(8);
+
+        t.equal(results[0].err, null, "zpool listing for 'zones' exited cleanly");
+        t.like(results[0].stdout, /^zones\s+?\d+?\s/, "zpool zones is listed");
+        t.equal(results[0].stderr, '', "no output on stderr");
+                    
+        // This is a list of known datasets _other_ than any UUID imported datasets
+        // this may change over time, but we should be careful of those changes
+        var known_ds = ['zones/config', 'zones/cores', 'zones/opt', 'zones/var', 'zones/usbkey'];
+        t.equal(results[1].err, null, "filesystems listing exited cleanly");
+        t.equivalent(results[1].ds_list.sort(), known_ds.sort(), "Expected datasets exist");
+                    
+        var known_zvols = ['zones/swap', 'zones/dump'];
+        t.equal(results[2].err, null, "volumess listing exited cleanly");
+        t.equivalent(results[2].vol_list.sort(), known_zvols.sort(), "Expected volumes exist");
+       
+        t.ok(fs.statSync('/zones/.system_pool'), ".system_pool file exists");
+        t.end();
+    });
+
+    // zones/.system_pool
+});
