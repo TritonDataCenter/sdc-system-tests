@@ -33,4 +33,13 @@ if [[ -f ${ROOT}/vm-tests.tgz && -d /usr/vm/test ]]; then
     rm -rf /var/tmp/vm-test.$$
 fi
 
+# agent tests
+(
+    # Dataset Manager
+    cd /opt/smartdc/agents/lib/node_modules/dataset_manager
+    zpool list nodezfstest 2>/dev/null || bash ./mktestpool.sh
+    SERVER_UUID=`sysinfo | json UUID` AMQP_HOST=`bash /lib/sdc/config.sh -json | json rabbitmq_admin_ip` \
+        ./node_modules/.bin/nodeunit --reporter tap tests > ${ROOT}/tap_output/dataset_manager.tap
+)
+
 tar -czf tap_output.tgz tap_output/
