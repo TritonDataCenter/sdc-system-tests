@@ -17,7 +17,7 @@ test("Check SDC health", function(t){
 
 test("Check services (all zones) status", function(t){
     t.plan(3);
-    child.exec('svcs -xvZ', function(err, stdout, stderr){
+    child.exec('/usr/bin/svcs -xvZ', function(err, stdout, stderr){
         t.equal(stdout, '', "svcs -xvZ shows no output on stdout");
         t.equal(stderr, '', "svcs -xvZ shows no output on stderr");
         t.equal(err, null, "svcs -xvZ exited cleanly");
@@ -44,7 +44,7 @@ test("Check platform version numbers", function(t){
 
     async.series([
         function(cb){
-            child.exec('uname -v', function(err, stdout, stderr){
+            child.exec('/usr/bin/uname -v', function(err, stdout, stderr){
                 cb(null, { err: err, stdout: stdout, stderr: stderr });
             });
         },
@@ -87,13 +87,13 @@ test("Check zpool and correct datasets", function(t){
             // check for zpool 'zones' existinga
             // zones    42681237504 5303693824  37377543680 12  100 ONLINE  -
             //
-            child.exec('zpool list -Hp zones >/dev/null', function(err, stdout, stderr){
+            child.exec('/usr/sbin/zpool list -Hp zones >/dev/null', function(err, stdout, stderr){
                 cb(null, { err: err, stdout: stdout, stderr: stderr });
             });
         },
         function(cb){
-            child.exec('zfs list -Hp -d 1 -o name -t filesystem zones | ' +
-                    'grep -v "[0-9a-z]\\{8\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}"',
+            child.exec('/usr/sbin/zfs list -Hp -d 1 -o name -t filesystem zones | ' +
+                    '/usr/bin/grep -v "[0-9a-z]\\{8\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}"',
                 function(err, stdout, stderr){
                     var ds_list = stdout.replace(/\n+$/, '');
                     ds_list = ds_list.split("\n").filter(
@@ -106,8 +106,8 @@ test("Check zpool and correct datasets", function(t){
             );
         },
         function(cb){
-            child.exec('zfs list -Hp -d 1 -o name -t volume zones | ' +
-                    'grep -v "[0-9a-z]\\{8\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}"',
+            child.exec('/usr/sbin/zfs list -Hp -d 1 -o name -t volume zones | ' +
+                    '/usr/bin/grep -v "[0-9a-z]\\{8\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}"',
                 function(err, stdout, stderr){
                     var vol_list = stdout.replace(/\n+$/, '');
                     vol_list = vol_list.split("\n");

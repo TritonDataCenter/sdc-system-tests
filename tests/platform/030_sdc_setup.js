@@ -5,7 +5,7 @@ var child = require('child_process');
 
 test("Install headnode zones", { timeout: 600000 }, function(t) {
     t.plan(1);
-    child.exec("sdc-setup -c headnode -A", 
+    child.exec("/smartdc/bin/sdc-setup -c headnode -A", 
         function(err, stdout, stderr){
             t.equal(err, null, "sdc-setup exited cleanly");
             
@@ -18,7 +18,7 @@ test("Install headnode zones", { timeout: 600000 }, function(t) {
 test("Services come up as expected", function(t) {
     t.plan(3);
     
-    child.exec('svcs -xvZ', function(err, stdout, stderr){
+    child.exec('/usr/bin/svcs -xvZ', function(err, stdout, stderr){
         t.equal(stdout, '', "svcs -xvZ shows no output on stdout");
         t.equal(stderr, '', "svcs -xvZ shows no output on stderr");
         t.equal(err, null, "svcs -xvZ exited cleanly");

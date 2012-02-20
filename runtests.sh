@@ -5,6 +5,10 @@
 
 ROOT=$(pwd)
 
+# Explicitly set PATH
+PATH=/usr/bin:/usr/sbin:/smartdc/bin:/opt/local/bin:/opt/local/sbin:/opt/smartdc/agents/bin
+export PATH
+
 rm -rf ./tap_output
 mkdir -p ./tap_output
 
