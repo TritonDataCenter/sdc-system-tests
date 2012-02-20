@@ -3,7 +3,7 @@
 var test = require('tap').test;
 var child = require('child_process');
 
-test("Install headnode zones", function(t) {
+test("Install headnode zones", { timeout: 600000 }, function(t) {
     t.plan(1);
     child.exec("sdc-setup -c headnode -A", 
         function(err, stdout, stderr){
