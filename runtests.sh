@@ -25,22 +25,6 @@ mkdir -p ./tap_output
     done
 )
 
-if [[ -f ${ROOT}/vm-tests.tgz && -d /usr/vm/test ]]; then
-    mkdir /var/tmp/vm-test.$$
-    mount -O -F lofs /var/tmp/vm-test.$$ /usr/vm/test
-    mkdir -p ${ROOT}/tap_output/vm-tests
-    # run in subshell so pwd is not affected
-    (
-       cd /usr/vm/test
-       tar -zxf ${ROOT}/vm-tests.tgz
-       for t in $(ls tests/*.js); do
-           ./run-test ${t} > ${ROOT}/tap_output/vm-tests/vm-$(basename ${t} .js).tap 2>/dev/null || true
-       done
-    )
-    umount /var/tmp/vm-test.$$
-    rm -rf /var/tmp/vm-test.$$
-fi
-
 # Agent Tests
 (
     export AMQP_HOST=`bash /lib/sdc/config.sh -json | json rabbitmq_admin_ip` 
@@ -73,7 +57,23 @@ fi
         # we want to continue running through all tests even if some fail
         ./node_modules/.bin/nodeunit --reporter tap $tap_test > ${ROOT}/tap_output/provisioner/$tap_out 2>/dev/null || true
     done
-
 )
+
+# VM Tests
+if [[ -f ${ROOT}/vm-tests.tgz && -d /usr/vm/test ]]; then
+    mkdir /var/tmp/vm-test.$$
+    mount -O -F lofs /var/tmp/vm-test.$$ /usr/vm/test
+    mkdir -p ${ROOT}/tap_output/vm-tests
+    # run in subshell so pwd is not affected
+    (
+       cd /usr/vm/test
+       tar -zxf ${ROOT}/vm-tests.tgz
+       for t in $(ls tests/*.js); do
+           ./run-test ${t} > ${ROOT}/tap_output/vm-tests/vm-$(basename ${t} .js).tap 2>/dev/null || true
+       done
+    )
+    umount /var/tmp/vm-test.$$
+    rm -rf /var/tmp/vm-test.$$
+fi
 
 tar -czf tap_output.tgz tap_output/
