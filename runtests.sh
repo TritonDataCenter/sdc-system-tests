@@ -21,7 +21,7 @@ mkdir -p ./tap_output
         tap_out=$(echo $tap_out | sed 's#/#__#g')
         tap_out+=".tap"
         # we want to continue running through all tests even if some fail
-        ./node_modules/tap/bin/tap.js --timeout 600 --tap $tap_test > ./tap_output/platform/$tap_out 2>/dev/null || true
+        ./node_modules/tap/bin/tap.js --timeout 1200 --tap $tap_test > ./tap_output/platform/$tap_out 2>/dev/null || true
     done
 )
 

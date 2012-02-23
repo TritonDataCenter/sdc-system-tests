@@ -10,7 +10,7 @@ test("Check SDC health", function(t){
     child.exec('/smartdc/bin/sdc-healthcheck -p', function(err, stdout, stderr){
         t.equal(err, null, "sdc-healthcheck exited cleanly");
         t.notEqual(stdout, '', "service output is not blank");
-        t.notLike(stdout, new RegExp('(?:offline|svc-err)','gm'), "no services showing as offline");
+        t.unlike(stdout, new RegExp('(?:offline|svc-err)','gm'), "no services showing as offline");
         t.end()
     });
 });
