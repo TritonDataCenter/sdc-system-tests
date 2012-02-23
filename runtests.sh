@@ -12,8 +12,9 @@ export PATH
 rm -rf ./tap_output
 mkdir -p ./tap_output
 
+# Run pre-sdc-setup tests
 (
-    LIST_OF_TESTS=`find tests/platform -type f | sort`
+    LIST_OF_TESTS=`find tests/platform -type f -name 'pre-*' | sort`
     IFS=$'\n'
     mkdir -p $ROOT/tap_output/platform
     for tap_test in $LIST_OF_TESTS; do
@@ -75,5 +76,19 @@ if [[ -f ${ROOT}/vm-tests.tgz && -d /usr/vm/test ]]; then
     umount /var/tmp/vm-test.$$
     rm -rf /var/tmp/vm-test.$$
 fi
+
+# Run post-sdc-setup tests
+(
+    LIST_OF_TESTS=`find tests/platform -type f -name 'post-*' | sort`
+    IFS=$'\n'
+    mkdir -p $ROOT/tap_output/platform
+    for tap_test in $LIST_OF_TESTS; do
+        tap_out=$(echo $tap_test | sed 's#^tests/##g')
+        tap_out=$(echo $tap_out | sed 's#/#__#g')
+        tap_out+=".tap"
+        # we want to continue running through all tests even if some fail
+        ./node_modules/tap/bin/tap.js --timeout 1200 --tap $tap_test > ./tap_output/platform/$tap_out 2>/dev/null || true
+    done
+)
 
 tar -czf tap_output.tgz tap_output/
