@@ -34,7 +34,7 @@ test("Check release.json is in place and looks good", function(t){
     t.ok(release_obj.branch, "has a branch");
     t.ok(release_obj.describe, "has a describe");
     t.ok(release_obj.timestamp, "has a timestamp");
-    t.like(release_obj.timestamp, new RegExp('^\d{8}T\d{6}Z$'), "timestamp is correct format");
+    t.like(release_obj.timestamp, /^\d{8}T\d{6}Z$/, "timestamp is correct format");
     t.end();
 
 });
@@ -62,7 +62,7 @@ test("Check platform version numbers", function(t){
     function(err, results){
         // uname -v
         var platform_dir = results[0].stdout.replace("\n", '');
-        t.like(platform_dir, new RegExp('joyent_\d{8}T\d{6}Z'), "uname -v format is correct");
+        t.like(platform_dir, /joyent_\d{8}T\d{6}Z/, "uname -v format is correct");
         t.equal(results[0].err, null, "uname -v exited cleanly");
         t.equal(results[0].stderr, '', "uname -v has nothing on stderr");
 
@@ -87,7 +87,7 @@ test("Check zpool and correct datasets", function(t){
             // check for zpool 'zones' existinga
             // zones    42681237504 5303693824  37377543680 12  100 ONLINE  -
             //
-            child.exec('/usr/sbin/zpool list -Hp zones >/dev/null', function(err, stdout, stderr){
+            child.exec('/usr/sbin/zpool list -Hp zones', function(err, stdout, stderr){
                 cb(null, { err: err, stdout: stdout, stderr: stderr });
             });
         },
@@ -120,7 +120,7 @@ test("Check zpool and correct datasets", function(t){
         t.plan(8);
 
         t.equal(results[0].err, null, "zpool listing for 'zones' exited cleanly");
-        t.like(results[0].stdout, /^zones\s+?\d+?\s/, "zpool zones is listed");
+        t.like(results[0].stdout, /^zones\s+?\d+?\s+?/, "zpool zones is listed");
         t.equal(results[0].stderr, '', "no output on stderr");
                     
         // This is a list of known datasets _other_ than any UUID imported datasets
