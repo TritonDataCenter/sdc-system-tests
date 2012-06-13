@@ -6,12 +6,28 @@ var async = require('async');
 var path = require('path');
 
 test("Install headnode zones", { timeout: 1200000 }, function(t) {
-    t.plan(1);
-    child.exec("/smartdc/bin/sdc-setup -c headnode -A",
-        function(err, stdout, stderr){
-            t.equal(err, null, "sdc-setup exited cleanly");
+    t.plan(7);
 
-            // What else should we test for here?
+    var order = ['ca', 'redis', 'amon', 'cloudapi', 'billapi', 'adminui', 'portal'];
+    var order_fn = [];
+    order.forEach(function(role_arg){
+        var func = function(cb){
+            var role = role_arg
+            var cmd = "/opt/smartdc/bin/sdc-role create " + role;
+            child.exec(cmd, function(err, stdout, stderr){
+                cb(null, [err, role_arg]);
+            });
+            
+        }
+        order_fn.push(func);
+    });
+
+    async.series(
+        order_fn,
+        function(err, results){
+            results.forEach(function(item){
+                t.equal(item[0], null, "sdc-role create "+item[1]+" exited cleanly");
+            });
             t.end();
         }
     );
@@ -72,7 +88,7 @@ test("Services come up as expected", function(t) {
 
 test("Check SDC health", function(t){
     t.plan(3);
-    child.exec('/smartdc/bin/sdc-healthcheck -p', function(err, stdout, stderr){
+    child.exec('/opt/smartdc/bin/sdc-healthcheck -p', function(err, stdout, stderr){
         t.equal(err, null, "sdc-healthcheck exited cleanly");
         t.notEqual(stdout, '', "service output is not blank");
         t.unlike(stdout, new RegExp('(?:offline|svc-err)$','gm'), "no services showing as offline");
