@@ -6,18 +6,21 @@ var async = require('async');
 var path = require('path');
 
 test("Install headnode zones", { timeout: 1200000 }, function(t) {
-    t.plan(7);
+    t.plan(8);
 
     var order = ['ca', 'redis', 'amon', 'cloudapi', 'billapi', 'adminui', 'portal'];
     var order_fn = [];
     order.forEach(function(role_arg){
         var func = function(cb){
-            var role = role_arg
+            var role = role_arg;
             var cmd = "/opt/smartdc/bin/sdc-role create " + role;
             child.exec(cmd, function(err, stdout, stderr){
-                cb(null, [err, role_arg]);
-                t.diag("STDOUT: " + stdout);
-                t.diag("STDERR: " + stderr);
+                cb(null, [err, role]);
+                if(err){
+                  t.comment("Creating for role: "+role);
+                  t.comment("STDOUT: " + stdout);
+                  t.comment("STDERR: " + stderr);
+                }
             });
             
         }
