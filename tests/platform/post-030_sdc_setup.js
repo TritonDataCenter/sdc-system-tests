@@ -16,6 +16,8 @@ test("Install headnode zones", { timeout: 1200000 }, function(t) {
             var cmd = "/opt/smartdc/bin/sdc-role create " + role;
             child.exec(cmd, function(err, stdout, stderr){
                 cb(null, [err, role_arg]);
+                t.diag("STDOUT: " + stdout);
+                t.diag("STDERR: " + stderr);
             });
             
         }
