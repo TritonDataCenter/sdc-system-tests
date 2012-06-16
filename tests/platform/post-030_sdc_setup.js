@@ -6,7 +6,7 @@ var async = require('async');
 var path = require('path');
 
 test("Install headnode zones", { timeout: 1200000 }, function(t) {
-    t.plan(8);
+    t.plan(7);
 
     var order = ['ca', 'redis', 'amon', 'cloudapi', 'billapi', 'adminui', 'portal'];
     var order_fn = [];
