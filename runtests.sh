@@ -6,7 +6,7 @@
 ROOT=$(pwd)
 
 # Explicitly set PATH
-PATH=/usr/bin:/usr/sbin:/smartdc/bin:/opt/local/bin:/opt/local/sbin:/opt/smartdc/agents/bin
+PATH=/usr/node/bin:/usr/bin:/usr/sbin:/opt/smartdc/bin:/opt/local/bin:/opt/local/sbin:/opt/smartdc/agents/bin
 export PATH
 
 rm -rf ./tap_output
