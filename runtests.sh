@@ -61,20 +61,15 @@ mkdir -p ./tap_output
 )
 
 # VM Tests
-if [[ -f ${ROOT}/vm-tests.tgz && -d /usr/vm/test ]]; then
-    mkdir /var/tmp/vm-test.$$
-    mount -O -F lofs /var/tmp/vm-test.$$ /usr/vm/test
+if [[ -d "/usr/vm/test" ]]; then
     mkdir -p ${ROOT}/tap_output/vm-tests
     # run in subshell so pwd is not affected
     (
        cd /usr/vm/test
-       tar -zxf ${ROOT}/vm-tests.tgz
        for t in $(ls tests/*.js); do
            ./run-test ${t} > ${ROOT}/tap_output/vm-tests/vm-$(basename ${t} .js).tap 2>/dev/null || true
        done
     )
-    umount /var/tmp/vm-test.$$
-    rm -rf /var/tmp/vm-test.$$
 fi
 
 # Run post-sdc-setup tests
