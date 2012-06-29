@@ -12,6 +12,9 @@ export PATH
 rm -rf ./tap_output
 mkdir -p ./tap_output
 
+# enable tests
+touch /lib/sdc/.sdc-test-no-production-data
+
 # Run pre-sdc-setup tests
 (
     LIST_OF_TESTS=`find tests/platform -type f -name 'pre-*' | sort`
