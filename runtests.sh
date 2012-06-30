@@ -71,7 +71,7 @@ if [[ -d "/usr/vm/test" ]]; then
     (
        cd /usr/vm/test
        for t in $(ls tests/*.js); do
-           ./run-test ${t} > ${ROOT}/tap_output/vm-tests/vm-$(basename ${t} .js).tap 2>/dev/null || true
+           ./runtest ${t} > ${ROOT}/tap_output/vm-tests/vm-$(basename ${t} .js).tap 2>/dev/null || true
        done
     )
 fi
