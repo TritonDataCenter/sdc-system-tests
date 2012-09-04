@@ -3,33 +3,43 @@
  * Test general health of the SDC core setup.
  */
 
-var test = require('tap').test;
-var async = require('async');
 var exec = require('child_process').exec;
 var fs = require('fs');
+var format = require('util').format;
+
+var test = require('tap').test;
+var async = require('async');
 
 
 
-//test("all sdc zones setup successfully", function(t){
-//    t.plan(1);
-//
-//    var zones_are_up = false;
-//    async.until(
-//        function () { return (zones_are_up === true); },
-//        function (cb){
-//            check_all_zones_are_up(function(result){
-//                zones_are_up = result;
-//                setTimeout(function(){
-//                    cb();
-//                }, 30000);
-//            });
-//        },
-//        function(err){
-//            t.ok(true, "All zones are setup");
-//            t.end();
-//        }
-//    );
-//});
+test("all sdc zones setup successfully", function(t){
+    exec('/opt/smartdc/bin/sdc-vmapi /vms '
+         + '| json -H -c tags.smartdc_role -aj server_uuid uuid',
+        function (err, stdout, stderr) {
+            t.ifError(err, 'get smartdc_role vms');
+            try {
+                var vms = JSON.parse(stdout);
+            } catch (syntaxErr) {
+                t.ifError(syntaxErr, syntaxErr);
+            }
+            async.forEachSeries(vms, function (vm, next) {
+                var cmd = format('/opt/smartdc/bin/sdc-oneachnode -n %s '
+                    + 'ls /zones/%s/root/var/svc/setup_complete >/dev/null',
+                    vm.server_uuid, vm.uuid);
+                exec(cmd, function (vmErr, vmStdout, vmStderr) {
+                    t.ifError(vmErr,
+                        format('does vm %s on CN %s have a '
+                            + '"/var/svc/setup_complete"? vmErr=%s',
+                            vm.uuid, vm.server_uuid, vmErr));
+                    next();
+                });
+            }, function (anyErr) {
+                t.ifError(anyErr, anyErr);
+                t.end();
+            });
+        }
+    );
+});
 
 
 test("sdc-healthcheck", function(t){
