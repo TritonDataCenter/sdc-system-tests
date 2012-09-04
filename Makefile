@@ -21,7 +21,7 @@ ifeq ($(shell uname -s),SunOS)
 	NODE_PREBUILT_VERSION=v0.8.8
 	NODE_PREBUILT_TAG=zone
 else
-	NPM	:= npm
+	NPM	:= $(shell which npm)
 endif
 
 
@@ -40,7 +40,7 @@ TMPDIR          := /tmp/$(STAMP)
 # Targets
 #
 .PHONY: all
-all:
+all: | $(NPM_EXEC)
 	$(NPM) install && $(NPM) update
 
 .PHONY: test
