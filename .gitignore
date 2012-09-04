@@ -1,1 +1,3 @@
-/vm-tests.tgz
+/node_modules
+/sdc-system-tests-*.tgz
+/tmp

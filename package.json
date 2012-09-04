@@ -1,8 +1,10 @@
 {
-    "name": "sdc-autotest",
-    "version": "0.0.1",
+    "name": "sdc-system-tests",
+    "version": "1.0.0",
+    "description": "Repo for general system tests for SDC",
+    "private": true,
     "dependencies": {
-        "tap": ">=0.0.11",
-        "async": ">=0.1.15"
+        "tap": "0.3.1",
+        "async": "0.1.22"
     }
 }
