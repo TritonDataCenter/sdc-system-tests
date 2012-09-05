@@ -34,17 +34,23 @@ TAP=./node_modules/tap/bin/tap.js
 cd $TOP
 
 # Setup a clean output dir.
-OUTPUT_DIR=/var/tmp/sdc-system-tests
+OUTPUT_DIR=/var/tmp/systests
 echo "# Setup a clean output dir ($OUTPUT_DIR)."
-rm -rf /var/tmp/sdc-system-tests
-mkdir -p /var/tmp/sdc-system-tests
+rm -rf $OUTPUT_DIR
+mkdir -p $OUTPUT_DIR
 
 echo ""
+echo "# Run sdc-system-tests."
 test_files=$(ls -1 test/*.test.js)
 if [[ -n "$test_files" ]]; then
     PATH=/usr/node/bin:$PATH TAP=1 $TAP $test_files \
         | tee $OUTPUT_DIR/sdc-system-tests.tap
 fi
+
+echo ""
+echo "# Run node-sdc-clients tests."
+PATH=/usr/node/bin:$PATH ./node_modules/sdc-clients/test/runtests \
+    | tee $OUTPUT_DIR/node-sdc-clients.tap
 
 # See AGENT-465
 ## Agent Tests
