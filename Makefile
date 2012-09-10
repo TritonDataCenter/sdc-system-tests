@@ -56,7 +56,7 @@ release:
 	cp -r \
 		$(TOP)/README.md \
 		$(TOP)/package.json \
-		$(TOP)/runtests.sh \
+		$(TOP)/runtests \
 		$(TOP)/test \
 		$(TOP)/node_modules \
 		$(TMPDIR)/$(NAME)-$(STAMP)/
