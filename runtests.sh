@@ -26,7 +26,8 @@ function fatal
 
 #---- mainline
 
-START_TIME=$(date +%s)
+start_time=$(date +%s)
+
 TOP=$(cd $(dirname $0)/; pwd)
 TAP=./node_modules/tap/bin/tap.js
 
@@ -52,39 +53,27 @@ echo "# Run node-sdc-clients tests."
 PATH=/usr/node/bin:$PATH ./node_modules/sdc-clients/test/runtests \
     | tee $OUTPUT_DIR/node-sdc-clients.tap
 
-# See AGENT-465
-## Agent Tests
-#(
-#    export AMQP_HOST=`bash /lib/sdc/config.sh -json | json rabbitmq_admin_ip`
-#    export SERVER_UUID=`sysinfo | json UUID`
-#    export NODE_PATH="/usr/vm/node_modules:/usr/node_modules"
-#
-#    # Provisioner
-#    cd /opt/smartdc/agents/lib/node_modules/provisioner-v2
-#    LIST_OF_TESTS=`find test -type f -name 'test-*.js' | sort`
-#    IFS=$'\n'
-#    mkdir -p ${TOP}/tap_output/provisioner
-#    for tap_test in $LIST_OF_TESTS; do
-#        tap_out=$(echo $tap_test | sed 's#^test/##g')
-#        tap_out=$(echo $tap_out | sed 's#/#__#g')
-#        tap_out+=".tap"
-#        # we want to continue running through all tests even if some fail
-#        ./node_modules/.bin/nodeunit --reporter tap $tap_test > ${TOP}/tap_output/provisioner/$tap_out 2>/dev/null || true
-#    done
-#)
 
-## Run post-sdc-setup tests
-#(
-#    LIST_OF_TESTS=`find tests/platform -type f -name 'post-*' | sort`
-#    IFS=$'\n'
-#    mkdir -p $TOP/tap_output/platform
-#    for tap_test in $LIST_OF_TESTS; do
-#        tap_out=$(echo $tap_test | sed 's#^tests/##g')
-#        tap_out=$(echo $tap_out | sed 's#/#__#g')
-#        tap_out+=".tap"
-#        # we want to continue running through all tests even if some fail
-#        ./node_modules/tap/bin/tap.js --timeout 1200 --tap $tap_test > ./tap_output/platform/$tap_out 2>/dev/null || true
-#    done
-#)
-#
-#tar -czf tap_output.tgz tap_output/
+# Colored summary of results (borrowed from smartos-live.git/src/vm/run-tests).
+echo ""
+echo "# test results:"
+
+end_time=$(date +%s)
+elapsed=$((${end_time} - ${start_time}))
+
+tests=$(grep "^# tests [0-9]" $OUTPUT_DIR/*.tap | cut -d ' ' -f3 | xargs | tr ' ' '+' | bc)
+passed=$(grep "^# pass  [0-9]" $OUTPUT_DIR/*.tap | tr -s ' ' | cut -d ' ' -f3 | xargs | tr ' ' '+' | bc)
+[[ -z ${tests} ]] && tests=0
+[[ -z ${passed} ]] && passed=0
+fail=$((${tests} - ${passed}))
+
+echo "# Completed in ${elapsed} seconds."
+echo -e "# \033[32mPASS: ${passed} / ${tests}\033[39m"
+if [[ ${fail} -gt 0 ]]; then
+    echo -e "# \033[31mFAIL: ${fail} / ${tests}\033[39m"
+fi
+echo ""
+
+if [[ ${tests} != ${passed} ]]; then
+    exit 1
+fi
