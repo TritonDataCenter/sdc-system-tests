@@ -41,6 +41,7 @@ TMPDIR          := /tmp/$(STAMP)
 .PHONY: all
 all: | $(NPM_EXEC)
 	$(NPM) install && $(NPM) update
+	cd node_modules/sdc-clients && $(NPM) install
 
 .PHONY: test
 test:
