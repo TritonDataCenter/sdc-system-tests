@@ -13,7 +13,6 @@ JSL_CONF_NODE	 = tools/jsl.node.conf
 JSL_FILES_NODE	 = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
 JSSTYLE_FLAGS	 = -f tools/jsstyle.conf
-TAP		:= ./node_modules/.bin/tap
 
 # Just want to use a node the same as the platform because usage of this
 # package will be using /usr/node/bin/node.

@@ -44,7 +44,7 @@ function fatal
 start_time=$(date +%s)
 
 TOP=$(cd $(dirname $0)/; pwd)
-TAP=./node_modules/tap/bin/tap.js
+NODEUNIT=./node_modules/nodeunit/bin/nodeunit
 
 
 cd $TOP
@@ -59,7 +59,7 @@ echo ""
 echo "# Run sdc-system-tests."
 test_files=$(ls -1 test/*.test.js)
 if [[ -n "$test_files" ]]; then
-    PATH=/usr/node/bin:$PATH TAP=1 $TAP $test_files \
+    PATH=/usr/node/bin:$PATH $NODEUNIT --reporter=tap $test_files \
         | tee $OUTPUT_DIR/sdc-system-tests.tap
 fi
 
@@ -92,4 +92,3 @@ echo ""
 if [[ ${tests} != ${passed} ]]; then
     exit 1
 fi
-

@@ -7,8 +7,15 @@ var exec = require('child_process').exec;
 var fs = require('fs');
 var format = require('util').format;
 
-var test = require('tap').test;
 var async = require('async');
+
+// node-tap API
+if (require.cache[__dirname + '/helper.js'])
+    delete require.cache[__dirname + '/helper.js'];
+var helper = require('./helper.js');
+var after = helper.after;
+var before = helper.before;
+var test = helper.test;
 
 
 
@@ -47,13 +54,13 @@ test("sdc-healthcheck", function(t){
     exec('/opt/smartdc/bin/sdc-healthcheck -p', function(err, stdout, stderr){
         t.equal(err, null, "sdc-healthcheck exited cleanly");
         t.notEqual(stdout, '', "service output is not blank");
-        t.unlike(stdout, new RegExp('(?:offline|svc-err)','gm'), "no services showing as offline");
+        var bad = /(?:offline|svc-err)/gm;
+        t.notOk(bad.test(stdout), "no services showing as offline");
         t.end()
     });
 });
 
 test("svcs -xvZ", function(t){
-    t.plan(3);
     exec('/usr/bin/svcs -xvZ', function(err, stdout, stderr){
         t.equal(stdout, '', "svcs -xvZ shows no output on stdout");
         t.equal(stderr, '', "svcs -xvZ shows no output on stderr");
@@ -70,7 +77,7 @@ test("/usbkey/release.json", function(t){
     t.ok(release_obj.branch, "has a branch");
     t.ok(release_obj.describe, "has a describe");
     t.ok(release_obj.timestamp, "has a timestamp");
-    t.like(release_obj.timestamp, /^\d{8}T\d{6}Z$/, "timestamp is correct format");
+    t.ok(/^\d{8}T\d{6}Z$/.test(release_obj.timestamp), "timestamp is correct format");
     t.end();
 
 });
@@ -98,14 +105,14 @@ test("platform version numbers", function(t){
     function(err, results){
         // uname -v
         var platform_dir = results[0].stdout.replace("\n", '');
-        t.like(platform_dir, /joyent_\d{8}T\d{6}Z/, "uname -v format is correct");
+        t.ok(/joyent_\d{8}T\d{6}Z/.test(platform_dir), "uname -v format is correct");
         t.equal(results[0].err, null, "uname -v exited cleanly");
         t.equal(results[0].stderr, '', "uname -v has nothing on stderr");
 
         platform_dir = platform_dir.replace('joyent_', '');
         // /usbkey/os contents
         t.equal(results[1].files.length, 2, "There are only 2 entries in /usbkey/os");
-        t.equivalent(results[1].files.sort(), ['latest', platform_dir].sort(), "/usbkey/os entries are as expected");
+        t.deepEqual(results[1].files.sort(), ['latest', platform_dir].sort(), "/usbkey/os entries are as expected");
         t.equal(results[1].err, null, "no errors reading /usbkey/os");
 
         // Ensure /usbkey/os/latest points to the correct place
@@ -156,18 +163,19 @@ test("zpool and correct datasets", function(t){
         t.plan(8);
 
         t.equal(results[0].err, null, "zpool listing for 'zones' exited cleanly");
-        t.like(results[0].stdout, /^zones\s+?\d+?\s+?/, "zpool zones is listed");
+        var stdout = results[0].stdout;
+        t.ok(/^zones\s+?\d+?\s+?/.test(stdout), "zpool zones is listed");
         t.equal(results[0].stderr, '', "no output on stderr");
 
         // This is a list of known datasets _other_ than any UUID imported datasets
         // this may change over time, but we should be careful of those changes
         var known_ds = ['zones/config', 'zones/cores', 'zones/opt', 'zones/var', 'zones/usbkey'];
         t.equal(results[1].err, null, "filesystems listing exited cleanly");
-        t.equivalent(results[1].ds_list.sort(), known_ds.sort(), "Expected datasets exist");
+        t.deepEqual(results[1].ds_list.sort(), known_ds.sort(), "Expected datasets exist");
 
         var known_zvols = ['zones/swap', 'zones/dump'];
         t.equal(results[2].err, null, "volumess listing exited cleanly");
-        t.equivalent(results[2].vol_list.sort(), known_zvols.sort(), "Expected volumes exist");
+        t.deepEqual(results[2].vol_list.sort(), known_zvols.sort(), "Expected volumes exist");
 
         t.ok(fs.statSync('/zones/.system_pool'), ".system_pool file exists");
         t.end();
