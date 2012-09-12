@@ -65,8 +65,10 @@ fi
 
 echo ""
 echo "# Run node-sdc-clients tests."
-PATH=/usr/node/bin:$PATH ./node_modules/sdc-clients/test/runtests \
-    | tee $OUTPUT_DIR/node-sdc-clients.tap
+echo "# **Skipping. See RELENG-386.**"
+# TODO(RELENG-386):
+#PATH=/usr/node/bin:$PATH ./node_modules/sdc-clients/test/runtests \
+#    | tee $OUTPUT_DIR/node-sdc-clients.tap
 
 
 # Colored summary of results (borrowed from smartos-live.git/src/vm/run-tests).
