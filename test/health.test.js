@@ -62,8 +62,10 @@ test("sdc-healthcheck", function(t){
 
 test("svcs -xvZ", function(t){
     exec('/usr/bin/svcs -xvZ', function(err, stdout, stderr){
-        t.equal(stdout, '', "svcs -xvZ shows no output on stdout");
-        t.equal(stderr, '', "svcs -xvZ shows no output on stderr");
+        t.equal(stdout, '',
+            format("svcs -xvZ shows no output on stdout: stdout=%j", stdout));
+        t.equal(stderr, '',
+            format("svcs -xvZ shows no output on stderr: stderr=%j", stderr));
         t.equal(err, null, "svcs -xvZ exited cleanly");
         t.end();
     });
