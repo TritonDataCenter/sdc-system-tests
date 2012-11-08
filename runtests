@@ -6,7 +6,7 @@
 #
 
 if [ "$TRACE" != "" ]; then
-    export PS4='${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
     set -o xtrace
 fi
 set -o errexit
@@ -65,10 +65,8 @@ fi
 
 echo ""
 echo "# Run node-sdc-clients tests."
-echo "# **Skipping. See RELENG-386.**"
-# TODO(RELENG-386):
-#PATH=/usr/node/bin:$PATH ./node_modules/sdc-clients/test/runtests \
-#    | tee $OUTPUT_DIR/node-sdc-clients.tap
+PATH=/usr/node/bin:$PATH ./node_modules/sdc-clients/test/runtests \
+    | tee $OUTPUT_DIR/node-sdc-clients.tap
 
 
 # Colored summary of results (borrowed from smartos-live.git/src/vm/run-tests).
