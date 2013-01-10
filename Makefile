@@ -17,7 +17,7 @@ JSSTYLE_FLAGS	 = -f tools/jsstyle.conf
 # Just want to use a node the same as the platform because usage of this
 # package will be using /usr/node/bin/node.
 ifeq ($(shell uname -s),SunOS)
-	NODE_PREBUILT_VERSION=v0.8.8
+	NODE_PREBUILT_VERSION=v0.8.14
 	NODE_PREBUILT_TAG=zone
 else
 	NPM	:= $(shell which npm)
