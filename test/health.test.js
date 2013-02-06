@@ -71,19 +71,6 @@ test("svcs -xvZ", function(t){
     });
 });
 
-test("/usbkey/release.json", function(t){
-    t.plan(5);
-
-    var release_obj = JSON.parse(fs.readFileSync('/usbkey/release.json'));
-    t.ok(release_obj.version, "has a version");
-    t.ok(release_obj.branch, "has a branch");
-    t.ok(release_obj.describe, "has a describe");
-    t.ok(release_obj.timestamp, "has a timestamp");
-    t.ok(/^\d{8}T\d{6}Z$/.test(release_obj.timestamp), "timestamp is correct format");
-    t.end();
-
-});
-
 test("platform version numbers", function(t){
     t.plan(7);
 
