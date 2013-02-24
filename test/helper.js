@@ -55,7 +55,10 @@ module.exports = {
                         t.plan = function plan(amount, message) {
                                 return t.expect(amount, message);
                         };
-
+                        // Nodeunit's ifError throws away 'message' arg.
+                        t.ifError = function ifError(err, message) {
+                                return (t.ok(!err, message));
+                        };
                         tester.call(this, t);
                 };
         }

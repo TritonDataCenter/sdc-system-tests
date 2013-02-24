@@ -21,7 +21,7 @@ var test = helper.test;
 
 test("all sdc zones setup successfully", function(t){
     exec('/opt/smartdc/bin/sdc-vmapi /vms '
-         + '| json -H -c tags.smartdc_role -aj server_uuid uuid',
+         + '| json -H -c tags.smartdc_role -aj server_uuid uuid alias',
         function (err, stdout, stderr) {
             t.ifError(err, 'get smartdc_role vms');
             try {
@@ -35,9 +35,9 @@ test("all sdc zones setup successfully", function(t){
                     vm.server_uuid, vm.uuid);
                 exec(cmd, function (vmErr, vmStdout, vmStderr) {
                     t.ifError(vmErr,
-                        format('does vm %s on CN %s have a '
+                        format('does vm %s (%s) on CN %s have a '
                             + '"/var/svc/setup_complete"? vmErr=%s',
-                            vm.uuid, vm.server_uuid, vmErr));
+                            vm.uuid, vm.alias, vm.server_uuid, vmErr));
                     next();
                 });
             }, function (anyErr) {
