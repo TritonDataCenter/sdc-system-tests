@@ -21,7 +21,9 @@ var test = helper.test;
 
 test("all sdc zones setup successfully", function(t){
     exec('/opt/smartdc/bin/sdc-vmapi /vms '
-         + '| json -H -c tags.smartdc_role -aj server_uuid uuid alias',
+         + '| json -H -c tags.smartdc_role '
+         + '    -c \'tags.smartdc_role !== "portal"\' '
+         + '    -aj server_uuid uuid alias',
         function (err, stdout, stderr) {
             t.ifError(err, 'get smartdc_role vms');
             try {
@@ -50,7 +52,6 @@ test("all sdc zones setup successfully", function(t){
 
 
 test("sdc-healthcheck", function(t){
-    t.plan(3);
     exec('/opt/smartdc/bin/sdc-healthcheck -p', function(err, stdout, stderr){
         t.equal(err, null, "sdc-healthcheck exited cleanly");
         t.notEqual(stdout, '', "service output is not blank");
@@ -72,8 +73,6 @@ test("svcs -xvZ", function(t){
 });
 
 test("platform version numbers", function(t){
-    t.plan(7);
-
     async.series([
         function(cb){
             exec('/usr/bin/uname -v', function(err, stdout, stderr){
@@ -97,12 +96,13 @@ test("platform version numbers", function(t){
         t.ok(/joyent_\d{8}T\d{6}Z/.test(platform_dir), "uname -v format is correct");
         t.equal(results[0].err, null, "uname -v exited cleanly");
         t.equal(results[0].stderr, '', "uname -v has nothing on stderr");
-
         platform_dir = platform_dir.replace('joyent_', '');
+
         // /usbkey/os contents
-        t.equal(results[1].files.length, 2, "There are only 2 entries in /usbkey/os");
-        t.deepEqual(results[1].files.sort(), ['latest', platform_dir].sort(), "/usbkey/os entries are as expected");
-        t.equal(results[1].err, null, "no errors reading /usbkey/os");
+        t.ifError(results[1].err, '/usbkey/os could be read');
+        var os_files = results[1].files;
+        t.ok(~os_files.indexOf(platform_dir), 'platform is in /usbkey/os');
+        t.ok(~os_files.indexOf('latest'), '/usbkey/os/latest exists');
 
         // Ensure /usbkey/os/latest points to the correct place
         t.equal(results[2].link, platform_dir, "/usbkey/os/latest link is correct");
@@ -116,9 +116,8 @@ test("zpool and correct datasets", function(t){
 
     async.series([
         function(cb){
-            // check for zpool 'zones' existinga
-            // zones    42681237504 5303693824  37377543680 12  100 ONLINE  -
-            //
+            // check for zpool 'zones' existing
+            //  zones    42681237504 5303693824  37377543680 12  100 ONLINE  -
             exec('/usr/sbin/zpool list -Hp zones', function(err, stdout, stderr){
                 cb(null, { err: err, stdout: stdout, stderr: stderr });
             });
@@ -149,8 +148,6 @@ test("zpool and correct datasets", function(t){
         }
     ],
     function(err, results){
-        t.plan(8);
-
         t.equal(results[0].err, null, "zpool listing for 'zones' exited cleanly");
         var stdout = results[0].stdout;
         t.ok(/^zones\s+?\d+?\s+?/.test(stdout), "zpool zones is listed");
@@ -158,13 +155,20 @@ test("zpool and correct datasets", function(t){
 
         // This is a list of known datasets _other_ than any UUID imported datasets
         // this may change over time, but we should be careful of those changes
-        var known_ds = ['zones/config', 'zones/cores', 'zones/opt', 'zones/var', 'zones/usbkey'];
         t.equal(results[1].err, null, "filesystems listing exited cleanly");
-        t.deepEqual(results[1].ds_list.sort(), known_ds.sort(), "Expected datasets exist");
+        ['zones/config',
+         'zones/cores',
+         'zones/opt',
+         'zones/var',
+         'zones/usbkey'].forEach(function (knownDs) {
+            t.ok(~results[1].ds_list.indexOf(knownDs),
+                'expected dataset exists: '+knownDs);
+        });
 
         var known_zvols = ['zones/swap', 'zones/dump'];
-        t.equal(results[2].err, null, "volumess listing exited cleanly");
-        t.deepEqual(results[2].vol_list.sort(), known_zvols.sort(), "Expected volumes exist");
+        t.equal(results[2].err, null, "volumes listing exited cleanly");
+        t.deepEqual(results[2].vol_list.sort(), known_zvols.sort(),
+            "expected volumes exist");
 
         t.ok(fs.statSync('/zones/.system_pool'), ".system_pool file exists");
         t.end();
