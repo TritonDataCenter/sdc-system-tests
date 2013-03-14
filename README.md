@@ -15,3 +15,5 @@ A repo to hold general SDC system tests. See
 and testing details and in particular
 <https://mo.joyent.com/globe-theatre/blob/master/bin/stage-test-system> for
 how the packages from this repo are used for system testing on staging.
+
+(test Bot Bot)
