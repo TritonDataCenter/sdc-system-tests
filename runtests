@@ -44,7 +44,7 @@ function usage () {
     echo "Options:"
     echo "  -h          Print this help and exit."
     echo "  -f FILTER   Filter pattern (substring match) for test files to run."
-    echo "  -r REPOTER  The nodeunit reporter to use, default is 'tap'."
+    echo "  -r REPOTER  The nodeunit reporter to use."
 }
 
 
@@ -58,7 +58,7 @@ NODEUNIT=./node_modules/nodeunit/bin/nodeunit
 
 # Options.
 opt_test_pattern=
-opt_reporter=tap
+opt_reporter=default
 while getopts "hf:r:" opt
 do
     case "$opt" in
@@ -104,28 +104,3 @@ echo "# Run node-sdc-clients tests."
 PATH=/usr/node/bin:$PATH ./node_modules/sdc-clients/test/runtests \
     -f "$opt_test_pattern" -r $opt_reporter \
     | tee $OUTPUT_DIR/node-sdc-clients.tap
-
-
-# Colored summary of results (borrowed from smartos-live.git/src/vm/run-tests).
-echo ""
-echo "# test results:"
-
-end_time=$(date +%s)
-elapsed=$((${end_time} - ${start_time}))
-
-tests=$(grep "^# tests [0-9]" $OUTPUT_DIR/*.tap | cut -d ' ' -f3 | xargs | tr ' ' '+' | bc)
-passed=$(grep "^# pass  [0-9]" $OUTPUT_DIR/*.tap | tr -s ' ' | cut -d ' ' -f3 | xargs | tr ' ' '+' | bc)
-[[ -z ${tests} ]] && tests=0
-[[ -z ${passed} ]] && passed=0
-fail=$((${tests} - ${passed}))
-
-echo "# Completed in ${elapsed} seconds."
-echo -e "# \033[32mPASS: ${passed} / ${tests}\033[39m"
-if [[ ${fail} -gt 0 ]]; then
-    echo -e "# \033[31mFAIL: ${fail} / ${tests}\033[39m"
-fi
-echo ""
-
-if [[ ${tests} != ${passed} ]]; then
-    exit 1
-fi
