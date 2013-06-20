@@ -54,6 +54,10 @@ test("all sdc zones setup successfully", function(t){
 test("sdc-healthcheck", function(t){
     exec('/opt/smartdc/bin/sdc-healthcheck -p', function(err, stdout, stderr){
         t.equal(err, null, "sdc-healthcheck exited cleanly");
+        if (err) {
+            console.log('-- sdc-healthcheck stdout:\n' + stdout);
+            console.log('-- sdc-healthcheck stderr:\n' + stderr);
+        }
         t.notEqual(stdout, '', "service output is not blank");
         var bad = /(?:offline|svc-err)/gm;
         t.notOk(bad.test(stdout), "no services showing as offline");
