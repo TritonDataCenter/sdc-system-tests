@@ -5,7 +5,7 @@
     "private": true,
     "dependencies": {
         "sdc-clients": "git+ssh://git@git.joyent.com:node-sdc-clients.git#master",
-        "nodeunit": "0.7.4",
-        "async": "0.1.22"
+        "nodeunit": "0.8.1",
+        "async": "0.2.9"
     }
 }

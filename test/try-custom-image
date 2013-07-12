@@ -1,0 +1,128 @@
+#!/bin/bash
+#
+# Try/test out a custom virtual image via CloudAPI.
+#
+# Usage:
+#   ./try-custom-image <custom-image-uuid> <motd>
+#
+# where <motd> is a /etc/motd of the day to verify in the created machine.
+#
+# This will:
+# - CreateMachine with that image
+# - SSH in a check <motd>
+# - Delete the machine
+#
+
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+set -o errexit
+set -o pipefail
+
+export PATH=/usr/bin:/usr/sbin:/smartdc/bin:/opt/smartdc/bin:/opt/local/bin:/opt/local/sbin:/opt/smartdc/agents/bin
+
+
+#---- support stuff
+
+function fatal {
+    echo "$0: fatal error: $*"
+    exit 1
+}
+
+function errexit {
+    [[ $1 -ne 0 ]] || exit 0
+    fatal "error exit status $1"
+}
+
+function delete_test_machine {
+    local vm_uuid=$(sdc sdc-cloudapi /my/machines \
+        | json -H -c "this.name=='test-custom-image'" 0.id)
+    if [[ -n "$vm_uuid" ]]; then
+        echo "Delete existing test-custom-image zone (uuid $vm_uuid)"
+        echo '```'
+        sdc-vmapi /vms/$vm_uuid -X DELETE | sdc sdc-waitforjob
+        echo '```'
+    fi
+}
+
+function create_test_machine {
+    vm_uuid=
+    local image_uuid=$1
+    echo "Create test-custom-image machine from image $image_uuid"
+    local package_uuid=$(sdc sdc-cloudapi /my/packages \
+        | json -H -c 'this.memory === 256' 0.id)
+    local network_uuid=$(sdc sdc-cloudapi /my/networks | json -H 0.id)
+
+    local response=$(cat <<EOM | sdc sdc-cloudapi /my/machines -X POST -d@-
+{
+    "name": "test-custom-image",
+    "package": "$package_uuid",
+    "image": "$image_uuid",
+    "networks": ["$network_uuid"]
+}
+EOM
+)
+    vm_uuid=$(echo "$response" | json -H id)
+    [[ -n "$vm_uuid" ]] || fatal "unexpected CreateMachine response: $response"
+
+    # Wait up to a minute for it to provision.
+    local vm_state
+    for i in {1..30}; do
+        sleep 2
+        echo -n '.'
+        vm_state=$(sdc sdc-cloudapi /my/machines/$vm_uuid | json -H state)
+        if [[ "$vm_state" != "provisioning" ]]; then
+            echo ""
+            break
+        fi
+    done
+    vm_state=$(sdc sdc-cloudapi /my/machines/$vm_uuid | json -H state)
+    if [[ $vm_state == "running" ]]; then
+        echo "Test machine $vm_uuid provisioned"
+    else
+        echo ""
+        fatal "Test machine $vm_uuid provision failed or timed out: $vm_state"
+    fi
+}
+
+function verify_motd
+{
+    local vm_uuid=$1
+    local motd="$2"
+
+    echo "Verify test vm $vm_uuid has expected motd"
+    local vm_ip=$(sdc sdc-cloudapi /my/machines/$vm_uuid | json -H ips.0)
+    local actual_motd=$(sdc ssh -T -q -i /root/.ssh/sdc.id_rsa \
+        -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+        $vm_ip \
+        "cat /etc/motd")
+
+    echo "Expected motd: $motd"
+    echo "  Actual motd: $actual_motd"
+    if [[ "$motd" != "$actual_motd" ]]; then
+        fatal "Unexpected motd in test vm $vm_uuid"
+    fi
+}
+
+
+
+#---- mainline
+
+trap 'errexit $?' EXIT
+START=$(date +%s)
+
+CUSTOM_IMAGE_UUID=$1
+MOTD="$2"
+[[ -z "$CUSTOM_IMAGE_UUID" ]] && fatal "no CUSTOM_IMAGE_UUID given"
+[[ -z "$MOTD" ]] && fatal "no MOTD given"
+
+echo "Try out custom image $CUSTOM_IMAGE_UUID"
+
+delete_test_machine
+create_test_machine $CUSTOM_IMAGE_UUID  # sets 'vm_uuid'
+verify_motd $vm_uuid "$MOTD"
+delete_test_machine
+
+END=$(date +%s)
+echo "$0 finished in $(($END - $START)) seconds"
