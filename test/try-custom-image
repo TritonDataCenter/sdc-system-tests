@@ -66,9 +66,9 @@ EOM
     vm_uuid=$(echo "$response" | json -H id)
     [[ -n "$vm_uuid" ]] || fatal "unexpected CreateMachine response: $response"
 
-    # Wait up to a minute for it to provision.
+    # Wait for it to provision.
     local vm_state
-    for i in {1..30}; do
+    while true; do
         sleep 2
         echo -n '.'
         vm_state=$(sdc sdc-cloudapi /my/machines/$vm_uuid | json -H state)
