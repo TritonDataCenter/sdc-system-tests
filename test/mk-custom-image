@@ -52,7 +52,7 @@ function install_image {
     local uuid=$1
     sdc-imgadm get $uuid >/dev/null 2>/dev/null && return
     echo "Installing image $uuid from images.joyent.com"
-    sdc-imgadm import $uuid -S https://images.joyent.com
+    sdc-imgadm import $uuid -S https://images.joyent.com --skip-owner-check
 }
 
 function delete_proto_machine {

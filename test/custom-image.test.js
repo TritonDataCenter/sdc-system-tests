@@ -40,9 +40,9 @@ test('custom image (base 13.1.0)', function (t) {
     };
     exec(cmd, options, function (err, stdout, stderr) {
         t.ifError(err, format('error running "%s":\n'
-            + 'err: %s\n'
-            + 'stdout: %s\n'
-            + 'stderr: %s', cmd, err, stdout, stderr));
+            + '  err: %s\n'
+            + '  stdout: %s\n'
+            + '  stderr: %s', cmd, err, stdout, stderr));
         if (err) {
             return t.end();
         }
@@ -51,15 +51,15 @@ test('custom image (base 13.1.0)', function (t) {
             __dirname, customImageUuid, motd);
         exec(cmd, function (err, stdout, stderr) {
             t.ifError(err, format('error running "%s":\n'
-                + 'err: %s\n'
-                + 'stdout: %s\n'
-                + 'stderr: %s', cmd, err, stdout, stderr));
+                + '  err: %s\n'
+                + '  stdout: %s\n'
+                + '  stderr: %s', cmd, err, stdout, stderr));
             var cmd = 'sdc-imgadm delete ' + customImageUuid;
             exec(cmd, function (err, stdout, stderr) {
                 t.ifError(err, format('error running "%s":\n'
-                    + 'err: %s\n'
-                    + 'stdout: %s\n'
-                    + 'stderr: %s', cmd, err, stdout, stderr));
+                    + '  err: %s\n'
+                    + '  stdout: %s\n'
+                    + '  stderr: %s', cmd, err, stdout, stderr));
                 t.end();
             });
         });
