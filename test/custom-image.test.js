@@ -34,6 +34,7 @@ test('custom image (base 13.1.0)', function (t) {
     var cmd1 = format('%s/mk-custom-image %s "%s" \'%s\'',
         __dirname, base_uuid, motd, JSON.stringify(data));
     var options = {
+        //maxBuffer: 2*1024*1024,  // suggested if TRACE is on
         env: {
             //"TRACE": "1"
         }
@@ -54,7 +55,7 @@ test('custom image (base 13.1.0)', function (t) {
                 + '  err: %s\n'
                 + '  stdout: %s\n'
                 + '  stderr: %s', cmd2, err2, stdout2, stderr2));
-            var cmd3 = 'sdc-imgadm delete ' + customImageUuid;
+            var cmd3 = '/opt/smartdc/bin/sdc-imgadm delete ' + customImageUuid;
             exec(cmd3, function (err3, stdout3, stderr3) {
                 t.ifError(err3, format('error running "%s":\n'
                     + '  err: %s\n'
