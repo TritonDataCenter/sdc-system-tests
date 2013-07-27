@@ -149,6 +149,9 @@ function create_image {
     echo "$response"
     echo '```'
     custom_image_uuid=$(echo "$response" | json -H id)
+    if [[ -z "$custom_image_uuid" ]]; then
+        fatal "error getting custom image uuid from CreateImageFromMachine res"
+    fi
 
     # Wait for image to be published.
     # Bad *current* limitation: a 404 on /my/images/UUID means either "still
