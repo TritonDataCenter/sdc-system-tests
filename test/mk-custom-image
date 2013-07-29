@@ -88,7 +88,7 @@ EOM
 
     # Wait for it to provision.
     local proto_state
-    while true; do
+    for i in {1..180}; do
         sleep 2
         echo -n '.'
         proto_state=$(sdc sdc-cloudapi /my/machines/$proto_uuid | json -H state)
@@ -119,7 +119,7 @@ function customize_and_prepare_proto_machine {
 
     # Wait for machine to stop.
     local proto_state
-    while true; do
+    for i in {1..180}; do
         sleep 2
         echo -n '.'
         proto_state=$(sdc sdc-cloudapi /my/machines/$proto_uuid | json -H state)
@@ -157,7 +157,7 @@ function create_image {
     # Bad *current* limitation: a 404 on /my/images/UUID means either "still
     # creating" or "creation failed". Can't distinguish right now.
     local image_published_at
-    while true; do
+    for i in {1..180}; do
         sleep 2
         echo -n '.'
         image_published_at=$(sdc sdc-cloudapi /my/images/$custom_image_uuid \
