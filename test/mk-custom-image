@@ -142,9 +142,10 @@ function create_image {
     local proto_uuid="$1"
     local manifest_json="$2"
 
+    echo "Create custom image from VM $proto_uuid"
     local data=$(echo "$manifest_json" | json -e "this.machine = '$proto_uuid'")
     local response=$(echo "$data" | sdc sdc-cloudapi /my/images -X POST -d@-)
-    #XXX expect a 201 (200?)
+    #TODO: expect a 201
     echo '```'
     echo "$response"
     echo '```'
