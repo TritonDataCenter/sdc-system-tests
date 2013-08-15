@@ -67,25 +67,11 @@ test("sdc-healthcheck", function(t){
 
 test("svcs -xvZ", function(t){
     exec('/usr/bin/svcs -xvZ', function(fullErr, fullStdout, fullStderr) {
-        if (!fullStdout.trim()) {
-            t.equal(fullStdout, '', format(
-                "svcs -xvZ shows no output on stdout: stdout=%j", fullStdout));
-            t.equal(fullStderr, '', format(
-                "svcs -xvZ shows no output on stderr: stderr=%j", fullStderr));
-            t.end();
-        } else {
-            var cmdSansPortal = '/usr/bin/svcs -xvZ | grep "Zone:" '
-                + '| grep -v $(vmadm lookup -1 alias=portal0)';
-            exec(cmdSansPortal, function(err, stdout, stderr) {
-                t.equal(stdout, '', format(
-                    "svcs -xvZ shows no output on stdout (ignore portal0): stdout=%j",
-                    fullStdout));
-                t.equal(stderr, '', format(
-                    "svcs -xvZ shows no output on stderr (ignore portal0): stderr=%j",
-                    fullStderr));
-                t.end();
-            });
-        }
+        t.equal(fullStdout, '', format(
+            "svcs -xvZ shows no output on stdout: stdout=%j", fullStdout));
+        t.equal(fullStderr, '', format(
+            "svcs -xvZ shows no output on stderr: stderr=%j", fullStderr));
+        t.end();
     });
 });
 
