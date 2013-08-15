@@ -210,7 +210,7 @@ delete_proto_machine
 if [[ -z "$PACKAGE_UUID" ]]; then
     create_proto_machine $BASE_IMAGE_UUID  # sets 'proto_uuid'
 else
-    create_proto_machine $BASE_IMAGE_UUID  $PACKAGE_UUID # sets 'proto_uuid'
+    create_proto_machine_with_package $BASE_IMAGE_UUID  $PACKAGE_UUID # sets 'proto_uuid'
 fi
 customize_and_prepare_proto_machine $proto_uuid "$MOTD"
 create_image $proto_uuid "$MANIFEST_JSON"  # sets 'custom_image_uuid'
