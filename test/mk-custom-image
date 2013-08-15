@@ -67,11 +67,16 @@ function delete_proto_machine {
 }
 
 function create_proto_machine {
-    proto_uuid=
-    local image_uuid=$1
-    echo "Create proto machine from image $image_uuid"
     local package_uuid=$(sdc sdc-cloudapi /my/packages \
         | json -H -c 'this.memory === 256' 0.id)
+    create_proto_machine_with_package $@ "$package_uuid"
+}
+
+function create_proto_machine_with_package {
+    proto_uuid=
+    local image_uuid=$1
+    local package_uuid=$2
+    echo "Create proto machine from image $image_uuid"
     local network_uuid=$(sdc sdc-cloudapi /my/networks | json -H 0.id)
 
     local response=$(cat <<EOM | sdc sdc-cloudapi /my/machines -X POST -d@-
@@ -191,6 +196,9 @@ MOTD=$1
 shift
 MANIFEST_JSON=$1
 shift
+PACKAGE_UUID=$1
+shift
+
 [[ -z "$BASE_IMAGE_UUID" ]] && fatal "no <base-image-uuid> given"
 [[ -z "$MOTD" ]] && fatal "no <motd> given"
 [[ -z "$MANIFEST_JSON" ]] && fatal "no <manifest-json> given"
@@ -199,7 +207,11 @@ echo "Make custom image from image $BASE_IMAGE_UUID"
 
 install_image $BASE_IMAGE_UUID
 delete_proto_machine
-create_proto_machine $BASE_IMAGE_UUID  # sets 'proto_uuid'
+if [[ -z "$PACKAGE_UUID" ]]; then
+    create_proto_machine $BASE_IMAGE_UUID  # sets 'proto_uuid'
+else
+    create_proto_machine $BASE_IMAGE_UUID  $PACKAGE_UUID # sets 'proto_uuid'
+fi
 customize_and_prepare_proto_machine $proto_uuid "$MOTD"
 create_image $proto_uuid "$MANIFEST_JSON"  # sets 'custom_image_uuid'
 delete_proto_machine

@@ -46,6 +46,48 @@ function delete_test_machine {
     fi
 }
 
+function create_test_machine_on_server {
+    vm_uuid=
+    local image_uuid=$1
+    local server=$2
+    echo "Create test-custom-image machine from image $image_uuid on server $server"
+
+    local network_uuid=$(sdc sdc-cloudapi /my/networks | json -H 0.id)
+    local response=$(cat <<EOM sdc sdc-vmapi /vms -X POST -d@-
+{
+"alias": "test",
+"owner_uuid": "$(bash /lib/sdc/config.sh -json | json ufds_admin_uuid)",
+"brand": "joyent",
+"ram": 256,
+"networks": [{"uuid": "$network_uuid"}],
+"server_uuid": "$server",
+"image_uuid": "$image_uuid"
+}
+EOM
+    vm_uuid=$(echo "$response" | json -H vm_uuid)
+    [[ -n "$vm_uuid" ]] || fatal "unexpected CreateMachine response: $response"
+
+    # Wait for it to provision.
+    local vm_state
+    while true; do
+        sleep 2
+        echo -n '.'
+        vm_state=$(sdc sdc-cloudapi /my/machines/$vm_uuid | json -H state)
+        if [[ "$vm_state" != "provisioning" ]]; then
+            echo ""
+            break
+        fi
+    done
+    vm_state=$(sdc sdc-cloudapi /my/machines/$vm_uuid | json -H state)
+    if [[ $vm_state == "running" ]]; then
+        echo "Test machine $vm_uuid provisioned"
+    else
+        echo ""
+        fatal "Test machine $vm_uuid provision failed or timed out: $vm_state"
+    fi
+
+}
+
 function create_test_machine {
     vm_uuid=
     local image_uuid=$1
@@ -114,13 +156,18 @@ START=$(date +%s)
 
 CUSTOM_IMAGE_UUID=$1
 MOTD="$2"
+SERVER="$3"
 [[ -z "$CUSTOM_IMAGE_UUID" ]] && fatal "no CUSTOM_IMAGE_UUID given"
 [[ -z "$MOTD" ]] && fatal "no MOTD given"
 
 echo "Try out custom image $CUSTOM_IMAGE_UUID"
 
 delete_test_machine
-create_test_machine $CUSTOM_IMAGE_UUID  # sets 'vm_uuid'
+if [[ -z "$SERVER" ]]; then
+    create_test_machine $CUSTOM_IMAGE_UUID  # sets 'vm_uuid'
+else
+    create_test_machine_on_server $CUSTOM_IMAGE_UUID $SERVER
+fi
 verify_motd $vm_uuid "$MOTD"
 delete_test_machine
 
