@@ -53,7 +53,7 @@ function create_test_machine_on_server {
     echo "Create test-custom-image machine from image $image_uuid on server $server"
 
     local network_uuid=$(sdc sdc-cloudapi /my/networks | json -H 0.id)
-    local response=$(cat <<EOM sdc sdc-vmapi /vms -X POST -d@-
+    local response=$(cat <<EOM | sdc sdc-vmapi /vms -X POST -d@-
 {
 "alias": "test",
 "owner_uuid": "$(bash /lib/sdc/config.sh -json | json ufds_admin_uuid)",
@@ -64,6 +64,7 @@ function create_test_machine_on_server {
 "image_uuid": "$image_uuid"
 }
 EOM
+)
     vm_uuid=$(echo "$response" | json -H vm_uuid)
     [[ -n "$vm_uuid" ]] || fatal "unexpected CreateMachine response: $response"
 

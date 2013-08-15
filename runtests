@@ -93,7 +93,7 @@ test_files=$(ls -1 test/*.test.js)
 imgapi_has_manta="$(sdc-imgapi /state | json -H -c '~this.storageTypes.indexOf("manta")')"
 if [[ -z "$imgapi_has_manta" ]]; then
     echo "*WARNING: IMGAPI isn't configured with a Manta, skipping 'custom-image' tests.*"
-    test_files=$(echo "$test_files" | grep -v "custom-image.test.js" || true)
+    test_files=$(echo "$test_files" | grep -v "custom-image.test.js" | grep -v "incremental-image.test.js" || true)
 fi
 if [[ -n "$opt_test_pattern" ]]; then
     test_files=$(echo "$test_files" | grep "$opt_test_pattern" || true)
