@@ -49,10 +49,10 @@ function usage () {
 }
 
 function cleanup () {
- sdc-cnapi /servers/$CN7_UUID \
+ sdc sdc-cnapi /servers/$CN7_UUID </dev/null\
  | json -H -e 'this.d = {"traits": this.traits}' d \
  | json -e 'this.traits.img_mgmt=undefined' \
- | sdc-cnapi /servers/$CN7_UUID -X POST -d@-
+ | sdc sdc-cnapi /servers/$CN7_UUID -X POST -d@-
 }
 
 #---- mainline
@@ -98,7 +98,7 @@ mkdir -p $OUTPUT_DIR
 sdc sdc-cnapi /servers/$CN7_UUID </dev/null \
  | json -H -e 'this.d = {"traits": this.traits}' d \
  | json -e 'this.traits.img_mgmt=undefined' \
- | sdc-cnapi /servers/$CN7_UUID -X POST -d@-
+ | sdc sdc-cnapi /servers/$CN7_UUID -X POST -d@- </dev/null
 
 
 echo ""
