@@ -95,7 +95,7 @@ echo "# Setup a clean output dir ($OUTPUT_DIR)."
 rm -rf $OUTPUT_DIR
 mkdir -p $OUTPUT_DIR
 
-sdc-cnapi /servers/$CN7_UUID \
+sdc sdc-cnapi /servers/$CN7_UUID </dev/null \
  | json -H -e 'this.d = {"traits": this.traits}' d \
  | json -e 'this.traits.img_mgmt=undefined' \
  | sdc-cnapi /servers/$CN7_UUID -X POST -d@-
