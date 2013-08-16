@@ -13,6 +13,7 @@ set -o errexit
 set -o pipefail
 
 
+CN7_LATEST_UUID="44454c4c-3700-104d-8034-cac04f475131"
 
 #---- guard
 
@@ -47,9 +48,16 @@ function usage () {
     echo "  -r REPOTER  The nodeunit reporter to use."
 }
 
-
+function cleanup () {
+ sdc-cnapi /servers/$CN7_UUID \
+ | json -H -e 'this.d = {"traits": this.traits}' d \
+ | json -e 'this.traits.img_mgmt=undefined' \
+ | sdc-cnapi /servers/$CN7_UUID -X POST -d@-
+}
 
 #---- mainline
+
+trap cleanup EXIT
 
 start_time=$(date +%s)
 
@@ -86,6 +94,12 @@ OUTPUT_DIR=/var/tmp/systests
 echo "# Setup a clean output dir ($OUTPUT_DIR)."
 rm -rf $OUTPUT_DIR
 mkdir -p $OUTPUT_DIR
+
+sdc-cnapi /servers/$CN7_UUID \
+ | json -H -e 'this.d = {"traits": this.traits}' d \
+ | json -e 'this.traits.img_mgmt=undefined' \
+ | sdc-cnapi /servers/$CN7_UUID -X POST -d@-
+
 
 echo ""
 echo "# Run sdc-system-tests."
