@@ -197,7 +197,6 @@ shift
 MANIFEST_JSON=$1
 shift
 PACKAGE_UUID=$1
-shift
 
 [[ -z "$BASE_IMAGE_UUID" ]] && fatal "no <base-image-uuid> given"
 [[ -z "$MOTD" ]] && fatal "no <motd> given"
