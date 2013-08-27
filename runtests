@@ -98,7 +98,7 @@ mkdir -p $OUTPUT_DIR
 
 sdc sdc-cnapi /servers/$CN7_UUID </dev/null \
  | json -H -e 'this.d = {"traits": this.traits}' d \
- | json -e 'this.traits.img_mgmt=undefined' \
+ | json -e 'this.traits.img_mgmt=true' \
  | sdc sdc-cnapi /servers/$CN7_UUID -X POST -d@- </dev/null
 
 

@@ -55,7 +55,7 @@ function create_test_machine_on_server {
     local network_uuid=$(sdc sdc-cloudapi /my/networks | json -H 0.id)
     local response=$(cat <<EOM | sdc sdc-vmapi /vms -X POST -d@-
 {
-"alias": "test",
+"alias": "test-custom-image",
 "owner_uuid": "$(bash /lib/sdc/config.sh -json | json ufds_admin_uuid)",
 "brand": "joyent",
 "ram": 256,
