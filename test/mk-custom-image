@@ -29,7 +29,7 @@ set -o pipefail
 
 export PATH=/usr/bin:/usr/sbin:/smartdc/bin:/opt/smartdc/bin:/opt/local/bin:/opt/local/sbin:/opt/smartdc/agents/bin
 
-
+is_kvm=false
 
 #---- support stuff
 
@@ -117,11 +117,24 @@ function customize_and_prepare_proto_machine {
     local motd="$2"
     echo "Customize and prep proto machine with '$motd' motd"
     local proto_ip=$(sdc sdc-cloudapi /my/machines/$proto_uuid | json -H ips.0)
-    sdc ssh -T -q -i /root/.ssh/sdc.id_rsa \
-        -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-        $proto_ip \
-        "echo \"$2\" >/etc/motd; sm-prepare-image -y"
-
+    if [[ $is_kvm == true ]]; then
+        set +o errexit
+        for i in {1..180}; do
+            sleep 2
+            echo -n '.'
+            sdc ssh -T -q -i /root/.ssh/sdc.id_rsa \
+                -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+                $proto_ip \
+                "echo \"$2\" >/etc/motd; /usr/bin/yes | /lib/smartdc/prepare-image; halt" && break
+        done
+        set -o errexit
+        sdc sdc-cloudapi /my/machines/$proto_uuid?action=stop -X POST </dev/null
+    else
+        sdc ssh -T -q -i /root/.ssh/sdc.id_rsa \
+            -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            $proto_ip \
+            "echo \"$2\" >/etc/motd; sm-prepare-image -y"
+    fi
     # Wait for machine to stop.
     local proto_state
     for i in {1..180}; do
@@ -205,6 +218,11 @@ PACKAGE_UUID=$1
 echo "Make custom image from image $BASE_IMAGE_UUID"
 
 install_image $BASE_IMAGE_UUID
+
+if [[ $(sdc-imgadm get $BASE_IMAGE_UUID 2>/dev/null | json os) != "smartos" ]]; then
+    is_kvm=true
+fi
+
 delete_proto_machine
 if [[ -z "$PACKAGE_UUID" ]]; then
     create_proto_machine $BASE_IMAGE_UUID  # sets 'proto_uuid'

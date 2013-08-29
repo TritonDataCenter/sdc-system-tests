@@ -22,6 +22,7 @@ set -o pipefail
 
 export PATH=/usr/bin:/usr/sbin:/smartdc/bin:/opt/smartdc/bin:/opt/local/bin:/opt/local/sbin:/opt/smartdc/agents/bin
 
+is_kvm=false
 
 #---- support stuff
 
@@ -51,13 +52,16 @@ function create_test_machine_on_server {
     local image_uuid=$1
     local server=$2
     echo "Create test-custom-image machine from image $image_uuid on server $server"
-
+    local brand="joyent"
+    if [[ $is_kvm == true ]]; then
+        brand="kvm"
+    fi
     local network_uuid=$(sdc sdc-cloudapi /my/networks | json -H 0.id)
     local response=$(cat <<EOM | sdc sdc-vmapi /vms -X POST -d@-
 {
 "alias": "test-custom-image",
 "owner_uuid": "$(bash /lib/sdc/config.sh -json | json ufds_admin_uuid)",
-"brand": "joyent",
+"brand": "$brand",
 "ram": 256,
 "networks": [{"uuid": "$network_uuid"}],
 "server_uuid": "$server",
@@ -136,11 +140,22 @@ function verify_motd
 
     echo "Verify test vm $vm_uuid has expected motd"
     local vm_ip=$(sdc sdc-cloudapi /my/machines/$vm_uuid | json -H ips.0)
-    local actual_motd=$(sdc ssh -T -q -i /root/.ssh/sdc.id_rsa \
-        -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-        $vm_ip \
-        "cat /etc/motd")
-
+    if [[ $is_kvm == true ]]; then
+        set +o errexit
+        for i in {1..180}; do
+            sleep 5
+            local actual_motd=$(sdc ssh -T -q -i /root/.ssh/sdc.id_rsa \
+            -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            $vm_ip \
+            "cat /etc/motd") && break
+        done
+        set -o errexit
+    else
+        local actual_motd=$(sdc ssh -T -q -i /root/.ssh/sdc.id_rsa \
+            -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            $vm_ip \
+            "cat /etc/motd") && break
+    fi
     echo "Expected motd: $motd"
     echo "  Actual motd: $actual_motd"
     if [[ "$motd" != "$actual_motd" ]]; then
@@ -164,6 +179,11 @@ SERVER="$3"
 echo "Try out custom image $CUSTOM_IMAGE_UUID"
 
 delete_test_machine
+
+if [[ $(sdc-imgadm get $CUSTOM_IMAGE_UUID 2>/dev/null | json os) != "smartos" ]]; then
+    is_kvm=true
+fi
+
 if [[ -z "$SERVER" ]]; then
     create_test_machine $CUSTOM_IMAGE_UUID  # sets 'vm_uuid'
 else
