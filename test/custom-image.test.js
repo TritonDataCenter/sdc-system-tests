@@ -74,43 +74,6 @@ test('custom image (base 13.1.0) on 6.5 CN', function(t) {
     });
 });
 
-test('custom image (base 13.1.0) on older 7.0 CN', function(t) {
-    var cmd1 = format('%s/mk-custom-image %s "%s" \'%s\' %s',
-        __dirname, base_uuid, motd, JSON.stringify(data), restricted_package);
-    var options = {
-        //maxBuffer: 2*1024*1024,  // suggested if TRACE is on
-        env: {
-            //"TRACE": "1"
-        }
-    };
-    exec(cmd1, options, function (err1, stdout1, stderr1) {
-        t.ifError(err1, format('error running "%s":\n'
-            + '  err: %s\n'
-            + '  stdout: %s\n'
-            + '  stderr: %s', cmd1, err1, stdout1, stderr1));
-        if (err1) {
-            return t.end();
-        }
-        var customImageUuid = stdout1.trim().split(/\n/g).slice(-1);
-        var cmd2 = format('%s/try-custom-image %s "%s" %s',
-            __dirname, customImageUuid, motd, old7server);
-        exec(cmd2, function (err2, stdout2, stderr2) {
-            t.ifError(err2, format('error running "%s":\n'
-                + '  err: %s\n'
-                + '  stdout: %s\n'
-                + '  stderr: %s', cmd2, err2, stdout2, stderr2));
-            var cmd3 = '/opt/smartdc/bin/sdc-imgadm delete ' + customImageUuid;
-            exec(cmd3, function (err3, stdout3, stderr3) {
-                t.ifError(err3, format('error running "%s":\n'
-                        + '  err: %s\n'
-                        + '  stdout: %s\n'
-                        + '  stderr: %s', cmd3, err3, stdout3, stderr3));
-                    t.end();
-            });
-        });
-    });
-});
-
 test('custom image (base 13.1.0) on latest 7.0 CN with CloudAPI & DAPI', function(t) {
     var cmd1 = format('%s/mk-custom-image %s "%s" \'%s\' %s',
         __dirname, base_uuid, motd, JSON.stringify(data), restricted_package);
