@@ -57,7 +57,8 @@ function create_test_machine_on_server {
         brand="kvm"
     fi
     local network_uuid=$(sdc sdc-cloudapi /my/networks | json -H 0.id)
-    local response=$(cat <<EOM | sdc sdc-vmapi /vms -X POST -d@-
+
+    local response=$(cat <<EOM | sdc sdc-vmapi /vms -X POST -d@- | json -H -a job_uuid vm_uuid
 {
 "alias": "test-custom-image",
 "owner_uuid": "$(bash /lib/sdc/config.sh -json | json ufds_admin_uuid)",
@@ -69,8 +70,12 @@ function create_test_machine_on_server {
 }
 EOM
 )
-    vm_uuid=$(echo "$response" | json -H vm_uuid)
+    local job_uuid=$(echo $response | cut -d ' ' -f1)
+    local vm_uuid=$(echo $response | cut -d ' ' -f2)
+    sdc sdc-waitforjob $job_uuid < /dev/null
+
     [[ -n "$vm_uuid" ]] || fatal "unexpected CreateMachine response: $response"
+    echo "$response" | json -H job_uuid | xargs | sdc sdc-waitforjob
 
     # Wait for it to provision.
     local vm_state
