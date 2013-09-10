@@ -75,21 +75,21 @@ EOM
     sdc sdc-waitforjob $job_uuid < /dev/null
 
     [[ -n "$vm_uuid" ]] || fatal "unexpected CreateMachine response: $response"
-    echo "$response" | json -H job_uuid | xargs | sdc sdc-waitforjob
+    sdc sdc-waitforjob $job_uuid
 
     # Wait for it to provision.
     local vm_state
     while true; do
         sleep 2
         echo -n '.'
-        vm_state=$(sdc sdc-cloudapi /my/machines/$vm_uuid | json -H state)
+        vm_state=$(sdc sdc-cloudapi /my/machines | json -H -c 'this.name == "test-custom-image"' 0.state)
         if [[ "$vm_state" != "provisioning" ]]; then
             echo ""
             break
         fi
     done
-    vm_state=$(sdc sdc-cloudapi /my/machines/$vm_uuid | json -H state)
-    if [[ $vm_state == "running" ]]; then
+    vm_state=$(sdc sdc-cloudapi /my/machines | json -H -c 'this.name == "test-custom-image"' 0.state)
+    if [[ "$vm_state" == "running" ]]; then
         echo "Test machine $vm_uuid provisioned"
     else
         echo ""
