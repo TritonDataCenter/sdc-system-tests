@@ -16,9 +16,11 @@ JSSTYLE_FLAGS	 = -f tools/jsstyle.conf
 
 # Just want to use a node the same as the platform because usage of this
 # package will be using /usr/node/bin/node.
+# Use smartos/1.6.3 builds, but don't really care because we use the 'gz' tag.
+NODE_PREBUILT_IMAGE=01b2c898-945f-11e1-a523-af1afbe22822
 ifeq ($(shell uname -s),SunOS)
-	NODE_PREBUILT_VERSION=v0.8.22
-	NODE_PREBUILT_TAG=zone
+	NODE_PREBUILT_VERSION=v0.8.26
+	NODE_PREBUILT_TAG=gz
 else
 	NPM	:= $(shell which npm)
 endif
