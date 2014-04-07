@@ -49,16 +49,8 @@ function usage () {
     echo "  -r REPOTER  The nodeunit reporter to use."
 }
 
-function cleanup () {
- sdc sdc-cnapi /servers/$CN7_UUID </dev/null\
- | json -H -e 'this.d = {"traits": this.traits}' d \
- | json -e 'this.traits.img_mgmt=undefined' \
- | sdc sdc-cnapi /servers/$CN7_UUID -X POST -d@-
-}
 
 #---- mainline
-
-trap cleanup EXIT
 
 start_time=$(date +%s)
 
@@ -95,12 +87,6 @@ OUTPUT_DIR=/var/tmp/systests
 echo "# Setup a clean output dir ($OUTPUT_DIR)."
 rm -rf $OUTPUT_DIR
 mkdir -p $OUTPUT_DIR
-
-sdc sdc-cnapi /servers/$CN7_UUID </dev/null \
- | json -H -e 'this.d = {"traits": this.traits}' d \
- | json -e 'this.traits.img_mgmt=true' \
- | sdc sdc-cnapi /servers/$CN7_UUID -X POST -d@- </dev/null
-
 
 echo ""
 echo "# Run sdc-system-tests."
