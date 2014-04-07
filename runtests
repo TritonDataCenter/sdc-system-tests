@@ -12,10 +12,9 @@ fi
 set -o errexit
 set -o pipefail
 
-
-CN7_UUID="44454c4c-3700-104d-8034-cac04f475131"
-
 PATH=/opt/smartdc/bin:/usr/node/bin:$PATH
+
+
 #---- guard
 
 if [[ ! -f "/lib/sdc/.sdc-test-no-production-data" ]]; then
