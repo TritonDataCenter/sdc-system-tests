@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012, Joyent, Inc. All rights reserved.
+# Copyright (c) 2014, Joyent, Inc. All rights reserved.
 #
 # Makefile for sdc-system-tests
 #
@@ -14,12 +14,11 @@ JSL_FILES_NODE	 = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
 JSSTYLE_FLAGS	 = -f tools/jsstyle.conf
 
-# Just want to use a node the same as the platform because usage of this
-# package will be using /usr/node/bin/node.
-# Use smartos/1.6.3 builds, but don't really care because we use the 'gz' tag.
-NODE_PREBUILT_IMAGE=01b2c898-945f-11e1-a523-af1afbe22822
+# Use sdc-smartos/1.6.3 builds, but don't really care because we use the 'gz'
+# tag.
+NODE_PREBUILT_IMAGE=fd2cc906-8938-11e3-beab-4359c665ac99
 ifeq ($(shell uname -s),SunOS)
-	NODE_PREBUILT_VERSION=v0.8.26
+	NODE_PREBUILT_VERSION=v0.10.26
 	NODE_PREBUILT_TAG=gz
 else
 	NPM	:= $(shell which npm)
@@ -33,8 +32,8 @@ endif
 
 
 RELEASE_TARBALL	:= $(NAME)-$(STAMP).tgz
-TMPDIR          := /tmp/$(STAMP)
-DISTCLEAN_FILES += node_modules
+RELSTAGEDIR	:= /tmp/$(STAMP)
+DISTCLEAN_FILES	+= node_modules
 
 
 
@@ -53,19 +52,22 @@ test:
 .PHONY: release
 release:
 	@echo "Building $(RELEASE_TARBALL)"
-	echo "TAR is $(TAR)"
-	rm -rf $(TMPDIR)
-	mkdir -p $(TMPDIR)/$(NAME)-$(STAMP)
+	rm -rf $(RELSTAGEDIR)
+	mkdir -p $(RELSTAGEDIR)/$(NAME)-$(STAMP)
 	cp -r \
 		$(TOP)/README.md \
 		$(TOP)/package.json \
 		$(TOP)/runtests \
 		$(TOP)/test \
 		$(TOP)/node_modules \
-		$(TMPDIR)/$(NAME)-$(STAMP)/
-	(cd $(TMPDIR) && pwd && find .)
-	(cd $(TMPDIR) && $(TAR) -czf $(TOP)/$(RELEASE_TARBALL) $(NAME)-$(STAMP))
-	@rm -rf $(TMPDIR)
+		$(RELSTAGEDIR)/$(NAME)-$(STAMP)/
+	mkdir -p $(RELSTAGEDIR)/$(NAME)-$(STAMP)/build
+	cp -r \
+		$(TOP)/build/node \
+		$(RELSTAGEDIR)/$(NAME)-$(STAMP)/build
+	(cd $(RELSTAGEDIR) && pwd && find .)
+	(cd $(RELSTAGEDIR) && $(TAR) -czf $(TOP)/$(RELEASE_TARBALL) $(NAME)-$(STAMP))
+	@rm -rf $(RELSTAGEDIR)
 
 .PHONY: publish
 publish: release
