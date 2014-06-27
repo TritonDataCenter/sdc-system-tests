@@ -20,10 +20,9 @@ var test = helper.test;
 
 
 test("all sdc zones setup successfully", function(t){
-    exec('/opt/smartdc/bin/sdc-vmapi /vms '
+    exec('/opt/smartdc/bin/sdc-vmapi /vms?state=active '
          + '| json -H -c this.tags.smartdc_role '
          + '    -c \'this.state === "running"\' '
-         + '    -c \'this.tags.smartdc_role !== "portal"\' '
          + '    -aj server_uuid uuid alias',
         function (err, stdout, stderr) {
             t.ifError(err, 'get smartdc_role vms');
