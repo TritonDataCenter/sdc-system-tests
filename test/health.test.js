@@ -34,7 +34,7 @@ test("all sdc zones setup successfully", function(t){
             }
             async.forEachSeries(vms, function (vm, next) {
                 var cmd = format('/opt/smartdc/bin/sdc-oneachnode -n %s '
-                    + 'ls /zones/%s/root/var/svc/setup_complete >/dev/null',
+                    + '"ls /zones/%s/root/var/svc/setup_complete >/dev/null"',
                     vm.server_uuid, vm.uuid);
                 exec(cmd, function (vmErr, vmStdout, vmStderr) {
                     t.ifError(vmErr,
