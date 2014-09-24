@@ -71,7 +71,7 @@ test("sdc-healthcheck", function(t){
         t.notEqual(stdout, '', "service output is not blank");
         var bad = /(?:offline|svc-err)/gm;
         t.notOk(bad.test(stdout), "no services showing as offline");
-        t.end()
+        t.end();
     });
 });
 
