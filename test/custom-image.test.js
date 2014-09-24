@@ -47,13 +47,13 @@ var old7server = '44454c4c-3700-104d-8032-cac04f475131';
 
 var motd = 'booga booga';
 
-test('custom image (base 13.1.0) on 6.5 CN', function(t) {
+test('custom image (base 13.1.0) on 6.5 CN', function (t) {
     var cmd1 = format('%s/mk-custom-image %s "%s" \'%s\' %s',
         __dirname, base_uuid, motd, JSON.stringify(data), restricted_package);
     var options = {
         //maxBuffer: 2*1024*1024,  // suggested if TRACE is on
         env: {
-            //"TRACE": "1"
+            //'TRACE': '1'
         }
     };
     exec(cmd1, options, function (err1, stdout1, stderr1) {
@@ -84,13 +84,14 @@ test('custom image (base 13.1.0) on 6.5 CN', function(t) {
     });
 });
 
-test('custom image (base 13.1.0) on latest 7.0 CN with CloudAPI & DAPI', function(t) {
+test('custom image (base 13.1.0) on latest 7.0 CN with CloudAPI & DAPI',
+        function (t) {
     var cmd1 = format('%s/mk-custom-image %s "%s" \'%s\' %s',
         __dirname, base_uuid, motd, JSON.stringify(data), restricted_package);
     var options = {
         //maxBuffer: 2*1024*1024,  // suggested if TRACE is on
         env: {
-            //"TRACE": "1"
+            //'TRACE': '1'
         }
     };
     exec(cmd1, options, function (err1, stdout1, stderr1) {
@@ -121,13 +122,14 @@ test('custom image (base 13.1.0) on latest 7.0 CN with CloudAPI & DAPI', functio
     });
 });
 
-test('custom KVM image (base CentOS6)', function(t) {
+test('custom KVM image (base CentOS6)', function (t) {
     var cmd1 = format('%s/mk-custom-image %s "%s" \'%s\' %s',
-        __dirname, base_kvm_uuid, motd, JSON.stringify(data), kvm_restricted_package);
+        __dirname, base_kvm_uuid, motd, JSON.stringify(data),
+        kvm_restricted_package);
     var options = {
         //maxBuffer: 2*1024*1024,  // suggested if TRACE is on
         env: {
-            //"TRACE": "1"
+            //'TRACE': '1'
         }
     };
     exec(cmd1, options, function (err1, stdout1, stderr1) {

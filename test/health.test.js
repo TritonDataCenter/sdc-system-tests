@@ -29,7 +29,7 @@ var test = helper.test;
 
 
 
-test("all sdc zones setup successfully", function(t){
+test('all sdc zones setup successfully', function (t) {
     exec('/opt/smartdc/bin/sdc-vmapi /vms?state=active '
          + '| json -H -c this.tags.smartdc_role '
          + '    -c \'this.state === "running"\' '
@@ -61,54 +61,55 @@ test("all sdc zones setup successfully", function(t){
 });
 
 
-test("sdc-healthcheck", function(t){
-    exec('/opt/smartdc/bin/sdc-healthcheck -p', function(err, stdout, stderr){
-        t.equal(err, null, "sdc-healthcheck exited cleanly");
+test('sdc-healthcheck', function (t) {
+    exec('/opt/smartdc/bin/sdc-healthcheck -p', function (err, stdout, stderr) {
+        t.equal(err, null, 'sdc-healthcheck exited cleanly');
         if (err) {
             console.log('-- sdc-healthcheck stdout:\n' + stdout);
             console.log('-- sdc-healthcheck stderr:\n' + stderr);
         }
-        t.notEqual(stdout, '', "service output is not blank");
+        t.notEqual(stdout, '', 'service output is not blank');
         var bad = /(?:offline|svc-err)/gm;
-        t.notOk(bad.test(stdout), "no services showing as offline");
+        t.notOk(bad.test(stdout), 'no services showing as offline');
         t.end();
     });
 });
 
-test("svcs -xvZ", function(t){
-    exec('/usr/bin/svcs -xvZ', function(fullErr, fullStdout, fullStderr) {
+test('svcs -xvZ', function (t) {
+    exec('/usr/bin/svcs -xvZ', function (fullErr, fullStdout, fullStderr) {
         t.equal(fullStdout, '', format(
-            "svcs -xvZ shows no output on stdout: stdout=%j", fullStdout));
+            'svcs -xvZ shows no output on stdout: stdout=%j', fullStdout));
         t.equal(fullStderr, '', format(
-            "svcs -xvZ shows no output on stderr: stderr=%j", fullStderr));
+            'svcs -xvZ shows no output on stderr: stderr=%j', fullStderr));
         t.end();
     });
 });
 
-test("platform version numbers", function(t){
+test('platform version numbers', function (t) {
     async.series([
-        function(cb){
-            exec('/usr/bin/uname -v', function(err, stdout, stderr){
+        function (cb) {
+            exec('/usr/bin/uname -v', function (err, stdout, stderr) {
                 cb(null, { err: err, stdout: stdout, stderr: stderr });
             });
         },
-        function(cb){
-            fs.readdir('/usbkey/os', function(err, files){
+        function (cb) {
+            fs.readdir('/usbkey/os', function (err, files) {
                 cb(null, { err: err, files: files });
             });
         },
-        function(cb){
-            fs.readlink('/usbkey/os/latest', function(err, linkpath){
+        function (cb) {
+            fs.readlink('/usbkey/os/latest', function (err, linkpath) {
                 cb(null, { err: err, link: linkpath });
             });
         }
     ],
-    function(err, results){
+    function (err, results) {
         // uname -v
-        var platform_dir = results[0].stdout.replace("\n", '');
-        t.ok(/joyent_\d{8}T\d{6}Z/.test(platform_dir), "uname -v format is correct");
-        t.equal(results[0].err, null, "uname -v exited cleanly");
-        t.equal(results[0].stderr, '', "uname -v has nothing on stderr");
+        var platform_dir = results[0].stdout.replace('\n', '');
+        t.ok(/joyent_\d{8}T\d{6}Z/.test(platform_dir),
+            'uname -v format is correct');
+        t.equal(results[0].err, null, 'uname -v exited cleanly');
+        t.equal(results[0].stderr, '', 'uname -v has nothing on stderr');
         platform_dir = platform_dir.replace('joyent_', '');
 
         // /usbkey/os contents
@@ -118,30 +119,33 @@ test("platform version numbers", function(t){
         t.ok(~os_files.indexOf('latest'), '/usbkey/os/latest exists');
 
         // Ensure /usbkey/os/latest points to the correct place
-        t.equal(results[2].link, platform_dir, "/usbkey/os/latest link is correct");
+        t.equal(results[2].link, platform_dir,
+            '/usbkey/os/latest link is correct');
         t.end();
     });
 
 });
 
 
-test("zpool and correct datasets", function(t){
+test('zpool and correct datasets', function (t) {
 
     async.series([
-        function(cb){
+        function (cb) {
             // check for zpool 'zones' existing
             //  zones    42681237504 5303693824  37377543680 12  100 ONLINE  -
-            exec('/usr/sbin/zpool list -Hp zones', function(err, stdout, stderr){
-                cb(null, { err: err, stdout: stdout, stderr: stderr });
-            });
+            exec('/usr/sbin/zpool list -Hp zones',
+                function (err, stdout, stderr) {
+                    cb(null, { err: err, stdout: stdout, stderr: stderr });
+                });
         },
-        function(cb){
+        function (cb) {
             exec('/usr/sbin/zfs list -Hp -d 1 -o name -t filesystem zones | ' +
+                    /* JSSTYLED */
                     '/usr/bin/grep -v "[0-9a-z]\\{8\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}"',
-                function(err, stdout, stderr){
+                function (err, stdout, stderr) {
                     var ds_list = stdout.replace(/\n+$/, '');
-                    ds_list = ds_list.split("\n").filter(
-                        function(element, index, array){
+                    ds_list = ds_list.split('\n').filter(
+                        function (element, index, array) {
                             return element != '' && element != 'zones';
                         }
                     );
@@ -149,26 +153,29 @@ test("zpool and correct datasets", function(t){
                 }
             );
         },
-        function(cb){
+        function (cb) {
             exec('/usr/sbin/zfs list -Hp -d 1 -o name -t volume zones | ' +
+                    /* JSSTYLED */
                     '/usr/bin/grep -v "[0-9a-z]\\{8\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}-[0-9a-z]\\{4\\}"',
-                function(err, stdout, stderr){
+                function (err, stdout, stderr) {
                     var vol_list = stdout.replace(/\n+$/, '');
-                    vol_list = vol_list.split("\n");
+                    vol_list = vol_list.split('\n');
                     cb(null, { err: err, vol_list: vol_list });
                 }
             );
         }
     ],
-    function(err, results){
-        t.equal(results[0].err, null, "zpool listing for 'zones' exited cleanly");
+    function (err, results) {
+        t.equal(results[0].err, null,
+            'zpool listing for "zones" exited cleanly');
         var stdout = results[0].stdout;
-        t.ok(/^zones\s+?\d+?\s+?/.test(stdout), "zpool zones is listed");
-        t.equal(results[0].stderr, '', "no output on stderr");
+        t.ok(/^zones\s+?\d+?\s+?/.test(stdout), 'zpool zones is listed');
+        t.equal(results[0].stderr, '', 'no output on stderr');
 
-        // This is a list of known datasets _other_ than any UUID imported datasets
-        // this may change over time, but we should be careful of those changes
-        t.equal(results[1].err, null, "filesystems listing exited cleanly");
+        // This is a list of known datasets _other_ than any UUID imported
+        // datasets this may change over time, but we should be careful of those
+        // changes
+        t.equal(results[1].err, null, 'filesystems listing exited cleanly');
         ['zones/config',
          'zones/cores',
          'zones/opt',
@@ -179,11 +186,11 @@ test("zpool and correct datasets", function(t){
         });
 
         var known_zvols = ['zones/swap', 'zones/dump'];
-        t.equal(results[2].err, null, "volumes listing exited cleanly");
+        t.equal(results[2].err, null, 'volumes listing exited cleanly');
         t.deepEqual(results[2].vol_list.sort(), known_zvols.sort(),
-            "expected volumes exist");
+            'expected volumes exist');
 
-        t.ok(fs.statSync('/zones/.system_pool'), ".system_pool file exists");
+        t.ok(fs.statSync('/zones/.system_pool'), '.system_pool file exists');
         t.end();
     });
 
