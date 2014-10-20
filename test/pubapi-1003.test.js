@@ -27,10 +27,13 @@ var test = helper.test;
 
 
 test('PUBAPI-1003', function (t) {
-    exec('openssl s_client -ssl3 -no_tls1 -connect $(vmadm lookup -j alias=cloudapi0 | json -a nics | json -c \'this.nic_tag==="external"\' 0.ip):443',
+    exec('openssl s_client -ssl3 -no_tls1 -connect '
+            + '$(vmadm lookup -j alias=cloudapi0 | json -a nics '
+            + '| json -c \'this.nic_tag==="external"\' 0.ip):443',
         function (err, stdout, stderr) {
-            t.ok(err, "got an error (expected)");
-            t.ok(stdout.indexOf('Secure Renegotiation IS NOT supported') !== -1, "didn't find expected marker");
+            t.ok(err, 'got an error (expected)');
+            t.ok(stdout.indexOf('Secure Renegotiation IS NOT supported') !== -1,
+                'did not find expected marker');
             t.end();
         }
     );
