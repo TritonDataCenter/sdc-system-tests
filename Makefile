@@ -51,6 +51,10 @@ DISTCLEAN_FILES	+= node_modules
 .PHONY: all
 all: | $(NPM_EXEC)
 	$(NPM) install
+	# Manually get the latest node-sdc-clients.git and build. This is
+	# to ensure we get its test suite, which 'npm install sdc-clients'
+	# (recently) doesn't include.
+	[[ -d node_modules/sdc-clients ]] && (cd node_modules/sdc-clients && git checkout master && git pull) || git clone https://github.com/joyent/node-sdc-clients.git node_modules/sdc-clients
 	cd node_modules/sdc-clients && $(NPM) install
 
 .PHONY: test
@@ -69,6 +73,7 @@ release:
 		$(TOP)/test \
 		$(TOP)/node_modules \
 		$(RELSTAGEDIR)/$(NAME)-$(STAMP)/
+	rm -rf $(RELSTAGEDIR)/$(NAME)-$(STAMP)/node_modules/sdc-clients/{deps,tools,.git}
 	mkdir -p $(RELSTAGEDIR)/$(NAME)-$(STAMP)/build
 	cp -r \
 		$(TOP)/build/node \
