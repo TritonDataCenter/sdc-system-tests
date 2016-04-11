@@ -1,11 +1,12 @@
 {
     "name": "sdc-system-tests",
-    "version": "1.1.0",
-    "description": "Repo for general system tests for SDC",
+    "version": "1.2.0",
+    "description": "Repo for general system tests for SDC, plus other test suites that otherwise don't get run",
     "private": true,
+    "// dependencies": "'sdc-clients' and 'dapi' are manually installed. See Makefile.",
     "dependencies": {
-        "nodeunit": "0.8.1",
-        "async": "0.2.9"
+        "async": "0.2.9",
+        "nodeunit": "0.9.1"
     },
     "license": "MPL-2.0"
 }

@@ -112,6 +112,13 @@ if [[ -n "$test_files" ]]; then
         | tee $OUTPUT_DIR/sdc-system-tests.tap
 fi
 
+# TODO: add a runtests to sdc-designation.git that can take `-f FILTER`.
+echo ""
+echo "# Run sdc-designation tests."
+(cd ./node_modules/dapi && ./node_modules/.bin/tape \
+    test/*.test.js test/algorithms.test.js) \
+    | tee $OUTPUT_DIR/sdc-designation.tap
+
 echo ""
 echo "# Run node-sdc-clients tests."
 PATH=$TOP/build/node/bin:$PATH ./node_modules/sdc-clients/test/runtests \
