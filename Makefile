@@ -54,7 +54,12 @@ all: | $(NPM_EXEC)
 	# Manually get the latest node-sdc-clients.git and build. This is
 	# to ensure we get its test suite, which 'npm install sdc-clients'
 	# (recently) doesn't include.
-	[[ -d node_modules/sdc-clients ]] && (cd node_modules/sdc-clients && git checkout IMGAPI-587 && git pull) || git clone https://github.com/joyent/node-sdc-clients.git node_modules/sdc-clients
+	if [[ -d node_modules/sdc-clients ]]; then \
+		(cd node_modules/sdc-clients && git pull && git checkout IMGAPI-587 && git pull); \
+	else; \
+		git clone https://github.com/joyent/node-sdc-clients.git node_modules/sdc-clients; \
+		(cd node_modules/sdc-clients && git checkout IMGAPI-587); \
+	fi
 	cd node_modules/sdc-clients && $(NPM) install
 	# Manually get the latest sdc-designation.git and build. This is
 	# to ensure we get its test suite, which 'npm install dapi'
