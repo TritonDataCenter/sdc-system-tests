@@ -22,12 +22,12 @@ JSL_FILES_NODE	 = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
 JSSTYLE_FLAGS	 = -f tools/jsstyle.conf
 
-# Use sdc-smartos/1.6.3 builds, but don't really care because we use the 'gz'
-# tag.
-NODE_PREBUILT_IMAGE=fd2cc906-8938-11e3-beab-4359c665ac99
+#XXX
+NODE_PREBUILT_IMAGE=18b094b0-eb01-11e5-80c1-175dac7ddf02
 ifeq ($(shell uname -s),SunOS)
-	NODE_PREBUILT_VERSION=v0.10.26
-	NODE_PREBUILT_TAG=gz
+	NODE_PREBUILT_VERSION=v4.5.0
+	#XXX
+	NODE_PREBUILT_TAG=zone
 else
 	NPM	:= $(shell which npm)
 endif
@@ -54,7 +54,7 @@ all: | $(NPM_EXEC)
 	# Manually get the latest node-sdc-clients.git and build. This is
 	# to ensure we get its test suite, which 'npm install sdc-clients'
 	# (recently) doesn't include.
-	[[ -d node_modules/sdc-clients ]] && (cd node_modules/sdc-clients && git checkout master && git pull) || git clone https://github.com/joyent/node-sdc-clients.git node_modules/sdc-clients
+	[[ -d node_modules/sdc-clients ]] && (cd node_modules/sdc-clients && git checkout IMGAPI-587 && git pull) || git clone https://github.com/joyent/node-sdc-clients.git node_modules/sdc-clients
 	cd node_modules/sdc-clients && $(NPM) install
 	# Manually get the latest sdc-designation.git and build. This is
 	# to ensure we get its test suite, which 'npm install dapi'
