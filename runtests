@@ -6,7 +6,7 @@
 #
 
 #
-# Copyright (c) 2014, Joyent, Inc.
+# Copyright 2017 Joyent, Inc.
 #
 
 #
@@ -98,11 +98,6 @@ mkdir -p $OUTPUT_DIR
 echo ""
 echo "# Run sdc-system-tests."
 test_files=$(ls -1 test/*.test.js)
-imgapi_has_manta="$(sdc-imgapi /state | json -H -c '~this.storageTypes.indexOf("manta")')"
-if [[ -z "$imgapi_has_manta" ]]; then
-    echo "*WARNING: IMGAPI isn't configured with a Manta, skipping 'custom-image' tests.*"
-    test_files=$(echo "$test_files" | grep -v "custom-image.test.js" | grep -v "incremental-image.test.js" || true)
-fi
 if [[ -n "$opt_test_pattern" ]]; then
     test_files=$(echo "$test_files" | grep "$opt_test_pattern" || true)
     echo "# Running filtered set of test files: $test_files"
@@ -122,5 +117,5 @@ echo "# Run sdc-designation tests."
 echo ""
 echo "# Run node-sdc-clients tests."
 PATH=$TOP/build/node/bin:$PATH ./node_modules/sdc-clients/test/runtests \
-    -f "$opt_test_pattern" -r $opt_reporter \
+    -f "$opt_test_pattern" \
     | tee $OUTPUT_DIR/node-sdc-clients.tap
