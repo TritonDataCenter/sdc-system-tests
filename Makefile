@@ -26,12 +26,7 @@ JSSTYLE_FLAGS	 = -f tools/jsstyle.conf
 NODE_PREBUILT_IMAGE=18b094b0-eb01-11e5-80c1-175dac7ddf02
 ifeq ($(shell uname -s),SunOS)
 	NODE_PREBUILT_VERSION=v0.10.48
-	# Even if sdc-system-tests runs in the GZ, we use a node build with a "zone"
-	# tag because a "gz" node build is not currently available for
-	# multiarch-15.4.1 images. However, a "gz" build would not differ from the
-	# one with the "zone" tag, so it's safe to use the "zone" one until the "gz"
-	# one is available.
-	NODE_PREBUILT_TAG=zone
+	NODE_PREBUILT_TAG=gz
 else
 	NPM	:= $(shell which npm)
 endif
