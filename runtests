@@ -66,7 +66,7 @@ NODEUNIT=./node_modules/nodeunit/bin/nodeunit
 
 # Options.
 opt_test_pattern=
-opt_reporter=default
+opt_reporter=tap
 while getopts "hf:r:" opt
 do
     case "$opt" in
