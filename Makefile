@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright (c) 2014, Joyent, Inc.
+# Copyright (c) 2019, Joyent, Inc.
 #
 
 #
@@ -31,18 +31,20 @@ else
 	NPM	:= $(shell which npm)
 endif
 
+# sdc-system-tests is not a public module, so override
+ENGBLD_DEST_OUT_PATH ?= /stor/builds
 
-include ./tools/mk/Makefile.defs
+ENGBLD_REQUIRE := $(shell git submodule update --init deps/eng)
+include ./deps/eng/tools/mk/Makefile.defs
+TOP ?= $(error Unable to access eng.git submodule Makefiles.)
+
 ifeq ($(shell uname -s),SunOS)
-	include ./tools/mk/Makefile.node_prebuilt.defs
+	include ./deps/eng/tools/mk/Makefile.node_prebuilt.defs
 endif
 
-
 RELEASE_TARBALL	:= $(NAME)-$(STAMP).tgz
-RELSTAGEDIR	:= /tmp/$(STAMP)
+RELSTAGEDIR	:= /tmp/$(NAME)-$(STAMP)
 DISTCLEAN_FILES	+= node_modules
-
-
 
 #
 # Targets
@@ -66,7 +68,7 @@ test:
 	./runtests.sh
 
 .PHONY: release
-release:
+release: all
 	@echo "Building $(RELEASE_TARBALL)"
 	rm -rf $(RELSTAGEDIR)
 	mkdir -p $(RELSTAGEDIR)/$(NAME)-$(STAMP)
@@ -83,17 +85,13 @@ release:
 		$(TOP)/build/node \
 		$(RELSTAGEDIR)/$(NAME)-$(STAMP)/build
 	(cd $(RELSTAGEDIR) && pwd && find .)
-	(cd $(RELSTAGEDIR) && $(TAR) -czf $(TOP)/$(RELEASE_TARBALL) $(NAME)-$(STAMP))
+	(cd $(RELSTAGEDIR) && $(TAR) -I pigz -cf $(TOP)/$(RELEASE_TARBALL) $(NAME)-$(STAMP))
 	@rm -rf $(RELSTAGEDIR)
 
 .PHONY: publish
 publish: release
-	@if [[ -z "$(BITS_DIR)" ]]; then \
-		@echo "error: 'BITS_DIR' must be set for 'publish' target"; \
-		exit 1; \
-	fi
-	mkdir -p $(BITS_DIR)/$(NAME)
-	cp $(TOP)/$(RELEASE_TARBALL) $(BITS_DIR)/$(NAME)/$(RELEASE_TARBALL)
+	mkdir -p $(ENGBLD_BITS_DIR)/$(NAME)
+	cp $(TOP)/$(RELEASE_TARBALL) $(ENGBLD_BITS_DIR)/$(NAME)/$(RELEASE_TARBALL)
 
 .PHONY: dumpvar
 dumpvar:
@@ -104,8 +102,8 @@ dumpvar:
 	@echo "$(VAR) is '$($(VAR))'"
 
 
-include ./tools/mk/Makefile.deps
+include ./deps/eng/tools/mk/Makefile.deps
 ifeq ($(shell uname -s),SunOS)
-	include ./tools/mk/Makefile.node_prebuilt.targ
+	include ./deps/eng/tools/mk/Makefile.node_prebuilt.targ
 endif
-include ./tools/mk/Makefile.targ
+include ./deps/eng/tools/mk/Makefile.targ
