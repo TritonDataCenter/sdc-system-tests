@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright (c) 2019, Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 #
@@ -30,9 +30,6 @@ ifeq ($(shell uname -s),SunOS)
 else
 	NPM	:= $(shell which npm)
 endif
-
-# sdc-system-tests is not a public module, so override
-ENGBLD_DEST_OUT_PATH ?= /stor/builds
 
 ENGBLD_REQUIRE := $(shell git submodule update --init deps/eng)
 include ./deps/eng/tools/mk/Makefile.defs
