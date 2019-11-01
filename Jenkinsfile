@@ -39,7 +39,7 @@ pipeline {
 set -o errexit
 set -o pipefail
 
-export ENGBLD_BITS_UPLOAD_IMGAPI=true
+# note this job does not publish to updates.joyent.com
 make print-BRANCH print-STAMP all release publish bits-upload''')
             }
         }
