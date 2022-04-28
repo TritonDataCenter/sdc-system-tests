@@ -52,12 +52,12 @@ all: | $(NPM_EXEC)
 	# Manually get the latest node-sdc-clients.git and build. This is
 	# to ensure we get its test suite, which 'npm install sdc-clients'
 	# (recently) doesn't include.
-	[[ -d node_modules/sdc-clients ]] && (cd node_modules/sdc-clients && git checkout master && git pull) || git clone https://github.com/joyent/node-sdc-clients.git node_modules/sdc-clients
+	[[ -d node_modules/sdc-clients ]] && (cd node_modules/sdc-clients && git checkout master && git pull) || git clone https://github.com/TritonDataCenter/node-sdc-clients.git node_modules/sdc-clients
 	cd node_modules/sdc-clients && $(NPM) install
 	# Manually get the latest sdc-designation.git and build. This is
 	# to ensure we get its test suite, which 'npm install dapi'
 	# (recently) doesn't include.
-	[[ -d node_modules/dapi ]] && (cd node_modules/dapi && git checkout master && git pull) || git clone https://github.com/joyent/sdc-designation.git node_modules/dapi
+	[[ -d node_modules/dapi ]] && (cd node_modules/dapi && git checkout master && git pull) || git clone https://github.com/TritonDataCenter/sdc-designation.git node_modules/dapi
 	cd node_modules/dapi && $(NPM) install
 
 .PHONY: test
