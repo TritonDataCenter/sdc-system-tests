@@ -6,15 +6,16 @@
 
 <!--
     Copyright (c) 2014, Joyent, Inc.
+    Copyright 2024 MNX Cloud, Inc.
 -->
 
 # sdc-system-tests
 
-This repository is part of the Joyent SmartDataCenter project (SDC).  For
-contribution guidelines, issues, and general documentation, visit the main
-[SDC](http://github.com/joyent/sdc) project page.
+This repository is part of the Triton Data Center project. For contribution
+guidelines, issues, and general documentation, visit the main
+[Triton](http://github.com/TritonDataCenter/triton) project page.
 
-A repo to hold general SDC system tests -- i.e. those independent of tests
+A repo to hold general Triton system tests -- i.e. those independent of tests
 in specific service repos.
 
 
